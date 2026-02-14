@@ -48,7 +48,7 @@
 
         packages = [
           androidComposition.androidsdk
-          pkgs.flutter
+          pkgs.flutter341
           pkgs.jdk21
         ];
 

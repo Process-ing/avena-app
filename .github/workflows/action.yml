@@ -21,7 +21,8 @@ jobs:
           cache: true
 
       - run: flutter pub get
-      - run: dart format $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.mocks.dart") --set-exit-if-changed
+      - run: flutter pub run build_runner build
+      - run: dart format $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.mocks.dart" -a -not -path "./.dart_tool/*") --set-exit-if-changed
 
   lint:
     name: Lint
@@ -42,8 +43,8 @@ jobs:
           cache: true
 
       - run: flutter pub get
-      - run: |
-          flutter analyze .
+      - run: flutter pub run build_runner build
+      - run: flutter analyze $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.mocks.dart" -a -not -path "./.dart_tool/*")
 
   test:
     name: Test
@@ -61,5 +62,7 @@ jobs:
           channel: stable
           cache: true
 
+      - run: flutter pub get
+      - run: flutter pub run build_runner build
       - name: Test with coverage
         run: flutter test --coverage
