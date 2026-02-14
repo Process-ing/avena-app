@@ -20,48 +20,128 @@ class CookBookScreen extends ConsumerWidget {
     final recipes = ref.watch(cookBookRecipesProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Cook Book'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.grey[300],
+            child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+          ),
+        ),
+        title: const Text(
+          'Cook Book',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(40),
-          child: Row(
+          preferredSize: const Size.fromHeight(50),
+          child: Column(
             children: [
-              Expanded(
-                child: SizedBox(
-                  height: 40,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    itemBuilder: (context, index) {
-                      final current = categories[index];
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    // Spacer to push chips to the right
+                    const Spacer(),
+                    // Category chips
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final current = categories[index];
+                          final isSelected = current == category;
 
-                      return ChoiceChip(
-                        label: Text(current),
-                        selected: current == category,
-                        onSelected: (v) => categoryNotifier.toggle(current),
-                      );
-                    },
-                    separatorBuilder: (_, _) => SizedBox(width: 4),
-                    itemCount: categories.length,
-                  ),
+                          return GestureDetector(
+                            onTap: () => categoryNotifier.toggle(current),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.black : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected ? Colors.black : Colors.grey[300]!,
+                                ),
+                              ),
+                              child: Text(
+                                current,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.black87,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        itemCount: categories.length,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const SizedBox(height: 40, child: VerticalDivider(width: 1)),
+                    const SizedBox(width: 8),
+                    // Pantry chip
+                    GestureDetector(
+                      onTap: () => pantryNotifier.toggle(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: pantry ? Colors.black : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: pantry ? Colors.black : Colors.grey[300]!,
+                          ),
+                        ),
+                        child: Text(
+                          'Pantry',
+                          style: TextStyle(
+                            color: pantry ? Colors.white : Colors.black87,
+                            fontWeight: pantry
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
                 ),
               ),
-              SizedBox(height: 40, child: VerticalDivider(width: 1)),
-              SizedBox(width: 4),
-              ChoiceChip(
-                label: Text('Pantry'),
-                selected: pantry,
-                onSelected: (_) => pantryNotifier.toggle(),
+              // Divider line
+              Container(
+                height: 1,
+                color: Colors.grey[300],
               ),
-              SizedBox(width: 8),
             ],
           ),
         ),
       ),
       body: recipes.map(
         data: (recipes) => CookBookRecipeList(recipes.value),
-        error: (error) => Text('Error loading recipes'),
-        loading: (_) => CircularProgressIndicator(),
+        error: (error) => const Center(
+          child: Text('Error loading recipes'),
+        ),
+        loading: (_) => const Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
     );
   }
@@ -75,10 +155,15 @@ class CookBookRecipeList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) => Card(
         clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Stack(
-          alignment: AlignmentGeometry.center,
+          alignment: Alignment.center,
           children: [
             Positioned.fill(
               child: Image.network(
@@ -86,18 +171,25 @@ class CookBookRecipeList extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+            ),
             Padding(
-              padding: EdgeInsetsGeometry.all(32),
+              padding: const EdgeInsets.all(32),
               child: Text(
                 recipes[index].name,
-                style: Theme.of(context).primaryTextTheme.displayLarge,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
           ],
         ),
       ),
-      separatorBuilder: (_, _) => SizedBox(height: 8),
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemCount: recipes.length,
     );
   }

@@ -19,10 +19,19 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  void _goToCookBook() {
+    setState(() {
+      _selectedIndex = 1; // Index of CookBookScreen
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final pageList = [
-      HomeScreen(onProfilePressed: () => _goToProfile(context)),
+      HomeScreen(
+        onProfilePressed: () => _goToProfile(context),
+        onNavigateToCookbook: _goToCookBook,
+      ),
       CookBookScreen(onProfilePressed: () => _goToProfile(context)),
       PantryScreen(onProfilePressed: () => _goToProfile(context)),
     ];

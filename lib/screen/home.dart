@@ -11,21 +11,25 @@ final Map<String, List<Map<String, dynamic>>> mealsByDay = {
       'label': 'Breakfast',
       'title': 'Raspberry almond butter bowl',
       'image': 'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=600',
+      'calories': 320,
     },
     {
       'label': 'Lunch',
       'title': 'Ricotta heirloom tomato tart',
       'image': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
+      'calories': 450,
     },
     {
       'label': 'Dinner',
       'title': 'Fancy cauli pizza',
       'image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600',
+      'calories': 380,
     },
     {
       'label': 'Snack',
       'title': 'Fruit & nuts bowl',
       'image': 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?w=600',
+      'calories': 180,
     },
   ],
   "Tuesday": [],
@@ -37,7 +41,14 @@ final Map<String, List<Map<String, dynamic>>> mealsByDay = {
 };
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required void Function() onProfilePressed});
+  final void Function() onProfilePressed;
+  final void Function() onNavigateToCookbook;
+
+  const HomeScreen({
+    super.key,
+    required this.onProfilePressed,
+    required this.onNavigateToCookbook,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -67,18 +78,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final todayMeals = mealsByDay[selectedDay] ?? [];
 
+    // TODO: Replace with actual calorie data
+    final caloriesConsumed = 1450.0;
+    final caloriesTotal = 2000.0;
+    final caloriesRemaining = caloriesTotal - caloriesConsumed;
+    final progress = (caloriesConsumed / caloriesTotal).clamp(0.0, 1.0);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-            },
+            onTap: widget.onProfilePressed,
             child: CircleAvatar(
               backgroundColor: Colors.grey[300],
               child: Icon(Icons.person, color: Colors.grey[600], size: 20),
@@ -120,10 +136,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             );
           }
-          return ListView.builder(
+          return ListView(
             padding: const EdgeInsets.all(16),
-            itemCount: meals.length,
-            itemBuilder: (context, idx) => _MealCard(meal: meals[idx]),
+            children: [
+              // Calorie Progress Card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Daily Calories',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          '${caloriesConsumed.toInt()} / ${caloriesTotal.toInt()}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 12,
+                        backgroundColor: Colors.grey[200],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progress >= 0.9 ? Colors.orange : Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${caloriesRemaining.toInt()} calories remaining',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Meal cards
+              ...meals.map((meal) => _MealCard(
+                meal: meal,
+                onChangeRecipe: widget.onNavigateToCookbook,
+              )),
+            ],
           );
         }).toList(),
       ),
@@ -133,7 +216,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
 class _MealCard extends StatelessWidget {
   final Map<String, dynamic> meal;
-  const _MealCard({required this.meal});
+  final VoidCallback onChangeRecipe;
+
+  const _MealCard({
+    required this.meal,
+    required this.onChangeRecipe,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +288,49 @@ class _MealCard extends StatelessWidget {
                     },
                   ),
                 ),
+                // Calorie badge - top right
+                if (meal['calories'] != null)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.local_fire_department,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${meal['calories']} cal',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                // Title overlay - center
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -238,10 +369,7 @@ class _MealCard extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () {
-                  // TODO: Navigate to cookbook
-                  // Navigator.push(context, MaterialPageRoute(builder: (_) => const CookbookScreen()));
-                },
+                onPressed: onChangeRecipe,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   side: BorderSide(color: Colors.grey[300]!),
