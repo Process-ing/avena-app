@@ -1,93 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../provider/profile_provider.dart';
+import '../model/user_profile_model.dart';
 
-class QAScreen extends StatefulWidget {
+class QAScreen extends ConsumerStatefulWidget {
   const QAScreen({super.key});
 
   @override
-  State<QAScreen> createState() => _QAScreenState();
+  ConsumerState<QAScreen> createState() => _QAScreenState();
 }
 
-class _QAScreenState extends State<QAScreen> {
+class _QAScreenState extends ConsumerState<QAScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-
-  // Shared state for all questionnaire data
-  final Map<String, dynamic> _userData = {
-    'gender': null,
-    'age': null,
-    'weight': null,
-    'height': null,
-    'goalWeight': null,
-    'healthGoal': null,
-    'pace': null,
-    'activityLevel': null, // <-- NEW FIELD
-    'meals': {},
-    'restrictions': {},
-  };
-
-  // Calculate TMB (Basal Metabolic Rate) using Mifflin-St Jeor equation
-  double? _calculateTMB() {
-    final gender = _userData['gender'];
-    final age = _userData['age'];
-    final weight = _userData['weight'];
-    final height = _userData['height'];
-
-    if (gender == null || age == null || weight == null || height == null) {
-      return null;
-    }
-
-    double tmb;
-    if (gender == 'Male') {
-      tmb = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-    } else if (gender == 'Female') {
-      tmb = (10 * weight) + (6.25 * height) - (5 * age) - 161;
-    } else {
-      // For 'Other', use average of both formulas
-      tmb =
-          ((10 * weight) +
-              (6.25 * height) -
-              (5 * age) +
-              5 +
-              (10 * weight) +
-              (6.25 * height) -
-              (5 * age) -
-              161) /
-          2;
-    }
-
-    return tmb;
-  }
-
-  // Calculate TDEE (Total Daily Energy Expenditure) based on activity level
-  double? _calculateTDEE() {
-    final tmb = _calculateTMB();
-    if (tmb == null) return null;
-
-    final activityLevel = _userData['activityLevel'];
-    double activityFactor;
-
-    switch (activityLevel) {
-      case 'Sedentary':
-        activityFactor = 1.2;
-        break;
-      case 'Lightly Active':
-        activityFactor = 1.375;
-        break;
-      case 'Moderately Active':
-        activityFactor = 1.55;
-        break;
-      case 'Very Active':
-        activityFactor = 1.725;
-        break;
-      case 'Extra Active':
-        activityFactor = 1.9;
-        break;
-      default:
-        activityFactor = 1.2; // Default to sedentary
-    }
-
-    return tmb * activityFactor;
-  }
+  bool _isSaving = false;
 
   void _nextPage() {
     if (_currentPage < 6) {
@@ -96,11 +22,50 @@ class _QAScreenState extends State<QAScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Finish questionnaire
+      // Finish questionnaire and save to backend
+      _saveProfile();
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      await ref.read(questionnaireProvider.notifier).saveProfile();
+
+      if (!mounted) return;
+
+      // Navigate to next screen after successful save
       // Navigator.pushReplacement(
-      // context,
-      // MaterialPageRoute(builder: (context) => const PantryScreen()),
+      //   context,
+      //   MaterialPageRoute(builder: (context) => const PantryScreen()),
       // );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving profile: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
@@ -116,6 +81,12 @@ class _QAScreenState extends State<QAScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F3),
@@ -124,11 +95,10 @@ class _QAScreenState extends State<QAScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: _previousPage,
+          onPressed: _isSaving ? null : _previousPage,
         ),
         title: Row(
           children: List.generate(7, (index) {
-            // Progress indicator update
             return Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -153,22 +123,13 @@ class _QAScreenState extends State<QAScreen> {
           });
         },
         children: [
-          _AboutYouStep(onNext: _nextPage, userData: _userData),
-          _HealthGoalStep(onNext: _nextPage, userData: _userData),
-          _PaceStep(onNext: _nextPage, userData: _userData),
-          _ActivityLevelStep(
-            // <-- NEW STEP
-            onNext: _nextPage,
-            userData: _userData,
-          ),
-          _MealsStep(onNext: _nextPage, userData: _userData),
-          _RestrictionsStep(onNext: _nextPage, userData: _userData),
-          _SummaryStep(
-            onNext: _nextPage,
-            userData: _userData,
-            tmb: _calculateTMB(),
-            tdee: _calculateTDEE(),
-          ),
+          _AboutYouStep(onNext: _nextPage),
+          _HealthGoalStep(onNext: _nextPage),
+          _PaceStep(onNext: _nextPage),
+          _ActivityLevelStep(onNext: _nextPage),
+          _MealsStep(onNext: _nextPage),
+          _RestrictionsStep(onNext: _nextPage),
+          _SummaryStep(onNext: _nextPage, isSaving: _isSaving),
         ],
       ),
     );
@@ -182,6 +143,7 @@ class _StepContainer extends StatelessWidget {
   final Widget child;
   final VoidCallback onNext;
   final String buttonText;
+  final bool isLoading;
 
   const _StepContainer({
     required this.title,
@@ -189,6 +151,7 @@ class _StepContainer extends StatelessWidget {
     required this.child,
     required this.onNext,
     this.buttonText = 'Continue',
+    this.isLoading = false,
   });
 
   @override
@@ -241,8 +204,18 @@ class _StepContainer extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: onNext,
-                  child: Text(
+                  onPressed: isLoading ? null : onNext,
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                      : Text(
                     buttonText,
                     style: const TextStyle(
                       fontSize: 16,
@@ -260,35 +233,49 @@ class _StepContainer extends StatelessWidget {
 }
 
 // Step 1: About You
-class _AboutYouStep extends StatefulWidget {
+class _AboutYouStep extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
 
-  const _AboutYouStep({required this.onNext, required this.userData});
+  const _AboutYouStep({required this.onNext});
 
   @override
-  State<_AboutYouStep> createState() => _AboutYouStepState();
+  ConsumerState<_AboutYouStep> createState() => _AboutYouStepState();
 }
 
-class _AboutYouStepState extends State<_AboutYouStep> {
+class _AboutYouStepState extends ConsumerState<_AboutYouStep> {
   late TextEditingController _ageController;
   late TextEditingController _weightController;
   late TextEditingController _heightController;
   String? _selectedGender;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _ageController = TextEditingController(
-      text: widget.userData['age']?.toString() ?? '',
-    );
-    _weightController = TextEditingController(
-      text: widget.userData['weight']?.toString() ?? '',
-    );
-    _heightController = TextEditingController(
-      text: widget.userData['height']?.toString() ?? '',
-    );
-    _selectedGender = widget.userData['gender'];
+    // Initialize with empty controllers - we'll populate them in didChangeDependencies
+    _ageController = TextEditingController();
+    _weightController = TextEditingController();
+    _heightController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only initialize once
+    if (!_isInitialized) {
+      final profile = ref.read(questionnaireProvider);
+      if (profile.age != null) {
+        _ageController.text = profile.age.toString();
+      }
+      if (profile.weight != null) {
+        _weightController.text = profile.weight.toString();
+      }
+      if (profile.height != null) {
+        _heightController.text = profile.height.toString();
+      }
+      _selectedGender = profile.gender;
+      _isInitialized = true;
+    }
   }
 
   @override
@@ -300,10 +287,52 @@ class _AboutYouStepState extends State<_AboutYouStep> {
   }
 
   void _saveAndContinue() {
-    widget.userData['gender'] = _selectedGender;
-    widget.userData['age'] = double.tryParse(_ageController.text);
-    widget.userData['weight'] = double.tryParse(_weightController.text);
-    widget.userData['height'] = double.tryParse(_heightController.text);
+    // Validate fields
+    if (_selectedGender == null ||
+        _ageController.text.isEmpty ||
+        _weightController.text.isEmpty ||
+        _heightController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please complete all fields'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final age = double.tryParse(_ageController.text);
+    final weight = double.tryParse(_weightController.text);
+    final height = double.tryParse(_heightController.text);
+
+    if (age == null || weight == null || height == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter valid numbers'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final notifier = ref.read(questionnaireProvider.notifier);
+    final currentProfile = ref.read(questionnaireProvider);
+
+    notifier.updateData(
+      currentProfile.copyWith(
+        gender: _selectedGender,
+        age: age,
+        weight: weight,
+        height: height,
+      ),
+    );
+
+    print('=== SAVED ABOUT YOU ===');
+    print('Gender: $_selectedGender');
+    print('Age: $age');
+    print('Weight: $weight');
+    print('Height: $height');
+
     widget.onNext();
   }
 
@@ -352,7 +381,7 @@ class _AboutYouStepState extends State<_AboutYouStep> {
           const SizedBox(height: 16),
           TextField(
             controller: _weightController,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
               labelText: 'Weight (kg)',
               hintText: 'Enter your weight',
@@ -362,7 +391,7 @@ class _AboutYouStepState extends State<_AboutYouStep> {
           const SizedBox(height: 16),
           TextField(
             controller: _heightController,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
               labelText: 'Height (cm)',
               hintText: 'Enter your height',
@@ -376,19 +405,19 @@ class _AboutYouStepState extends State<_AboutYouStep> {
 }
 
 // Step 2: Health Goal
-class _HealthGoalStep extends StatefulWidget {
+class _HealthGoalStep extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
 
-  const _HealthGoalStep({required this.onNext, required this.userData});
+  const _HealthGoalStep({required this.onNext});
 
   @override
-  State<_HealthGoalStep> createState() => _HealthGoalStepState();
+  ConsumerState<_HealthGoalStep> createState() => _HealthGoalStepState();
 }
 
-class _HealthGoalStepState extends State<_HealthGoalStep> {
+class _HealthGoalStepState extends ConsumerState<_HealthGoalStep> {
   String? _selectedGoal;
   late TextEditingController _goalWeightController;
+  bool _isInitialized = false;
   final List<String> _goals = [
     'Lose Weight',
     'Stay Fit',
@@ -399,10 +428,20 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
   @override
   void initState() {
     super.initState();
-    _selectedGoal = widget.userData['healthGoal'];
-    _goalWeightController = TextEditingController(
-      text: widget.userData['goalWeight']?.toString() ?? '',
-    );
+    _goalWeightController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final profile = ref.read(questionnaireProvider);
+      _selectedGoal = profile.healthGoal;
+      if (profile.goalWeight != null) {
+        _goalWeightController.text = profile.goalWeight.toString();
+      }
+      _isInitialized = true;
+    }
   }
 
   @override
@@ -412,12 +451,45 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
   }
 
   void _saveAndContinue() {
-    widget.userData['healthGoal'] = _selectedGoal;
-    if (_selectedGoal == 'Lose Weight') {
-      widget.userData['goalWeight'] = double.tryParse(
-        _goalWeightController.text,
+    // Validate
+    if (_selectedGoal == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a health goal'),
+          backgroundColor: Colors.orange,
+        ),
       );
+      return;
     }
+
+    final notifier = ref.read(questionnaireProvider.notifier);
+    final currentProfile = ref.read(questionnaireProvider);
+
+    double? goalWeight;
+    if (_selectedGoal == 'Lose Weight') {
+      goalWeight = double.tryParse(_goalWeightController.text);
+      if (goalWeight == null && _goalWeightController.text.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid goal weight'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+    }
+
+    notifier.updateData(
+      currentProfile.copyWith(
+        healthGoal: _selectedGoal,
+        goalWeight: goalWeight,
+      ),
+    );
+
+    print('=== SAVED HEALTH GOAL ===');
+    print('Goal: $_selectedGoal');
+    print('Goal Weight: $goalWeight');
+
     widget.onNext();
   }
 
@@ -429,7 +501,6 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
       onNext: _saveAndContinue,
       child: Column(
         children: [
-          // Goal options
           ..._goals.map((goal) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -440,13 +511,12 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
               ),
             );
           }),
-
-          // Show goal weight input if "Lose Weight" is selected
           if (_selectedGoal == 'Lose Weight') ...[
             const SizedBox(height: 24),
             TextField(
               controller: _goalWeightController,
-              keyboardType: TextInputType.number,
+              keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
                 labelText: 'Goal Weight (kg)',
                 hintText: 'What weight do you want to reach?',
@@ -462,18 +532,18 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
 }
 
 // Step 3: Pace
-class _PaceStep extends StatefulWidget {
+class _PaceStep extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
 
-  const _PaceStep({required this.onNext, required this.userData});
+  const _PaceStep({required this.onNext});
 
   @override
-  State<_PaceStep> createState() => _PaceStepState();
+  ConsumerState<_PaceStep> createState() => _PaceStepState();
 }
 
-class _PaceStepState extends State<_PaceStep> {
+class _PaceStepState extends ConsumerState<_PaceStep> {
   String? _selectedPace;
+  bool _isInitialized = false;
   final Map<String, String> _paces = {
     'Steady & Sustainable': 'Gradual progress, long-term habits',
     'Balanced': 'Moderate pace with flexibility',
@@ -481,13 +551,35 @@ class _PaceStepState extends State<_PaceStep> {
   };
 
   @override
-  void initState() {
-    super.initState();
-    _selectedPace = widget.userData['pace'];
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _selectedPace = ref.read(questionnaireProvider).pace;
+      _isInitialized = true;
+    }
   }
 
   void _saveAndContinue() {
-    widget.userData['pace'] = _selectedPace;
+    if (_selectedPace == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a pace'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final notifier = ref.read(questionnaireProvider.notifier);
+    final currentProfile = ref.read(questionnaireProvider);
+
+    notifier.updateData(
+      currentProfile.copyWith(pace: _selectedPace),
+    );
+
+    print('=== SAVED PACE ===');
+    print('Pace: $_selectedPace');
+
     widget.onNext();
   }
 
@@ -514,19 +606,20 @@ class _PaceStepState extends State<_PaceStep> {
   }
 }
 
-// Step 4: Activity Level  <-- NEW STEP
-class _ActivityLevelStep extends StatefulWidget {
+// Step 4: Activity Level
+class _ActivityLevelStep extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
 
-  const _ActivityLevelStep({required this.onNext, required this.userData});
+  const _ActivityLevelStep({required this.onNext});
 
   @override
-  State<_ActivityLevelStep> createState() => _ActivityLevelStepState();
+  ConsumerState<_ActivityLevelStep> createState() =>
+      _ActivityLevelStepState();
 }
 
-class _ActivityLevelStepState extends State<_ActivityLevelStep> {
+class _ActivityLevelStepState extends ConsumerState<_ActivityLevelStep> {
   String? _selectedActivityLevel;
+  bool _isInitialized = false;
   final Map<String, String> _activityLevels = {
     'Sedentary': 'Little or no exercise',
     'Lightly Active': 'Light exercise, 1-3 days/week',
@@ -536,13 +629,35 @@ class _ActivityLevelStepState extends State<_ActivityLevelStep> {
   };
 
   @override
-  void initState() {
-    super.initState();
-    _selectedActivityLevel = widget.userData['activityLevel'];
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _selectedActivityLevel = ref.read(questionnaireProvider).activityLevel;
+      _isInitialized = true;
+    }
   }
 
   void _saveAndContinue() {
-    widget.userData['activityLevel'] = _selectedActivityLevel;
+    if (_selectedActivityLevel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an activity level'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final notifier = ref.read(questionnaireProvider.notifier);
+    final currentProfile = ref.read(questionnaireProvider);
+
+    notifier.updateData(
+      currentProfile.copyWith(activityLevel: _selectedActivityLevel),
+    );
+
+    print('=== SAVED ACTIVITY LEVEL ===');
+    print('Activity Level: $_selectedActivityLevel');
+
     widget.onNext();
   }
 
@@ -570,37 +685,59 @@ class _ActivityLevelStepState extends State<_ActivityLevelStep> {
 }
 
 // Step 5: Meals
-class _MealsStep extends StatefulWidget {
+class _MealsStep extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
 
-  const _MealsStep({required this.onNext, required this.userData});
+  const _MealsStep({required this.onNext});
 
   @override
-  State<_MealsStep> createState() => _MealsStepState();
+  ConsumerState<_MealsStep> createState() => _MealsStepState();
 }
 
-class _MealsStepState extends State<_MealsStep> {
-  final Map<String, bool> _meals = {
-    'Breakfast': true,
-    'Brunch': false,
-    'Lunch': true,
-    'Afternoon Snack': false,
-    'Dinner': true,
-    'Midnight Snack': false,
-  };
+class _MealsStepState extends ConsumerState<_MealsStep> {
+  late Map<String, bool> _meals;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.userData['meals'] != null &&
-        (widget.userData['meals'] as Map).isNotEmpty) {
-      _meals.addAll(Map<String, bool>.from(widget.userData['meals']));
+    _meals = {
+      'Breakfast': true,
+      'Brunch': false,
+      'Lunch': true,
+      'Afternoon Snack': false,
+      'Dinner': true,
+      'Midnight Snack': false,
+    };
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final profile = ref.read(questionnaireProvider);
+      if (profile.meals.isNotEmpty) {
+        for (var entry in profile.meals.entries) {
+          if (_meals.containsKey(entry.key)) {
+            _meals[entry.key] = entry.value;
+          }
+        }
+      }
+      _isInitialized = true;
     }
   }
 
   void _saveAndContinue() {
-    widget.userData['meals'] = Map<String, bool>.from(_meals);
+    final notifier = ref.read(questionnaireProvider.notifier);
+    final currentProfile = ref.read(questionnaireProvider);
+
+    notifier.updateData(
+      currentProfile.copyWith(meals: Map<String, bool>.from(_meals)),
+    );
+
+    print('=== SAVED MEALS ===');
+    print('Meals: $_meals');
+
     widget.onNext();
   }
 
@@ -628,9 +765,8 @@ class _MealsStepState extends State<_MealsStep> {
               title: Text(
                 meal,
                 style: TextStyle(
-                  fontWeight: _meals[meal]!
-                      ? FontWeight.w600
-                      : FontWeight.normal,
+                  fontWeight:
+                  _meals[meal]! ? FontWeight.w600 : FontWeight.normal,
                   color: Colors.black87,
                 ),
               ),
@@ -650,42 +786,64 @@ class _MealsStepState extends State<_MealsStep> {
 }
 
 // Step 6: Restrictions
-class _RestrictionsStep extends StatefulWidget {
+class _RestrictionsStep extends ConsumerStatefulWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
 
-  const _RestrictionsStep({required this.onNext, required this.userData});
+  const _RestrictionsStep({required this.onNext});
 
   @override
-  State<_RestrictionsStep> createState() => _RestrictionsStepState();
+  ConsumerState<_RestrictionsStep> createState() => _RestrictionsStepState();
 }
 
-class _RestrictionsStepState extends State<_RestrictionsStep> {
-  final Map<String, bool> _restrictions = {
-    'Gluten-free': false,
-    'Dairy-free': false,
-    'Nut-free': false,
-    'Shellfish-free': false,
-    'Vegetarian': false,
-    'Vegan': false,
-    'Pescatarian': false,
-    'No Pork': false,
-    'No Alcohol': false,
-  };
+class _RestrictionsStepState extends ConsumerState<_RestrictionsStep> {
+  late Map<String, bool> _restrictions;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.userData['restrictions'] != null &&
-        (widget.userData['restrictions'] as Map).isNotEmpty) {
-      _restrictions.addAll(
-        Map<String, bool>.from(widget.userData['restrictions']),
-      );
+    _restrictions = {
+      'Gluten-free': false,
+      'Dairy-free': false,
+      'Nut-free': false,
+      'Shellfish-free': false,
+      'Vegetarian': false,
+      'Vegan': false,
+      'Pescatarian': false,
+      'No Pork': false,
+      'No Alcohol': false,
+    };
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final profile = ref.read(questionnaireProvider);
+      if (profile.restrictions.isNotEmpty) {
+        for (var entry in profile.restrictions.entries) {
+          if (_restrictions.containsKey(entry.key)) {
+            _restrictions[entry.key] = entry.value;
+          }
+        }
+      }
+      _isInitialized = true;
     }
   }
 
   void _saveAndContinue() {
-    widget.userData['restrictions'] = Map<String, bool>.from(_restrictions);
+    final notifier = ref.read(questionnaireProvider.notifier);
+    final currentProfile = ref.read(questionnaireProvider);
+
+    notifier.updateData(
+      currentProfile.copyWith(
+        restrictions: Map<String, bool>.from(_restrictions),
+      ),
+    );
+
+    print('=== SAVED RESTRICTIONS ===');
+    print('Restrictions: $_restrictions');
+
     widget.onNext();
   }
 
@@ -735,30 +893,73 @@ class _RestrictionsStepState extends State<_RestrictionsStep> {
 }
 
 // Step 7: Summary with TMB/TDEE
-class _SummaryStep extends StatelessWidget {
+class _SummaryStep extends ConsumerWidget {
   final VoidCallback onNext;
-  final Map<String, dynamic> userData;
-  final double? tmb;
-  final double? tdee;
+  final bool isSaving;
 
   const _SummaryStep({
     required this.onNext,
-    required this.userData,
-    required this.tmb,
-    required this.tdee,
+    required this.isSaving,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final profile = ref.watch(questionnaireProvider);
+    final notifier = ref.read(questionnaireProvider.notifier);
+
+    final tmb = notifier.calculateTMB();
+    final tdee = notifier.calculateTDEE();
+    final recommendedCalories = notifier.calculateRecommendedCalories();
+    final weeksToGoal = notifier.calculateWeeksToGoal();
+
+    // Debug: Print profile data to see what's available
+    print('=== PROFILE DATA ===');
+    print('Gender: ${profile.gender}');
+    print('Age: ${profile.age}');
+    print('Weight: ${profile.weight}');
+    print('Height: ${profile.height}');
+    print('Activity Level: ${profile.activityLevel}');
+    print('Health Goal: ${profile.healthGoal}');
+    print('TMB: $tmb');
+    print('TDEE: $tdee');
+    print('==================');
 
     return _StepContainer(
       title: 'Your Personalized Plan',
       subtitle: 'Based on your information',
       onNext: onNext,
       buttonText: 'Get Started',
+      isLoading: isSaving,
       child: Column(
         children: [
+          // Show warning if data is incomplete
+          if (tmb == null || tdee == null) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Missing data: ${profile.gender == null ? "Gender " : ""}${profile.age == null ? "Age " : ""}${profile.weight == null ? "Weight " : ""}${profile.height == null ? "Height " : ""}${profile.activityLevel == null ? "Activity Level" : ""}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.orange.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           // TMB/TDEE Card
           Container(
             padding: const EdgeInsets.all(20),
@@ -784,37 +985,31 @@ class _SummaryStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 // TMB
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Basal Metabolic Rate',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Basal Metabolic Rate',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tmb != null ? '${tmb?.round()} kcal' : '-- kcal',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                          const SizedBox(height: 4),
+                          Text(
+                            tmb != null ? '${tmb.round()} kcal' : '-- kcal',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        ],
                       ),
                     ),
                   ],
@@ -822,49 +1017,76 @@ class _SummaryStep extends StatelessWidget {
                 const SizedBox(height: 16),
                 Divider(color: Colors.grey[300]),
                 const SizedBox(height: 16),
-
                 // TDEE
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Total Daily Energy',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total Daily Energy',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tdee != null ? '${tdee?.round()} kcal' : '-- kcal',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                          const SizedBox(height: 4),
+                          Text(
+                            tdee != null ? '${tdee.round()} kcal' : '-- kcal',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        ],
                       ),
                     ),
                   ],
                 ),
+                if (recommendedCalories != null) ...[
+                  const SizedBox(height: 16),
+                  Divider(color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  // Recommended Calories
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Recommended Intake',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${recommendedCalories.round()} kcal',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: 24),
-
           // Goal summary
-          if (userData['healthGoal'] == 'Lose Weight' &&
-              userData['goalWeight'] != null) ...[
+          if (profile.healthGoal == 'Lose Weight' &&
+              profile.goalWeight != null) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -886,20 +1108,29 @@ class _SummaryStep extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${userData['goalWeight']} kg',
+                          '${profile.goalWeight} kg',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
                         ),
+                        if (weeksToGoal != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Est. ${weeksToGoal.round()} weeks',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  if (userData['weight'] != null &&
-                      userData['goalWeight'] != null)
+                  if (profile.weight != null && profile.goalWeight != null)
                     Text(
-                      '${(userData['weight'] - userData['goalWeight']).abs().toStringAsFixed(1)} kg to go',
+                      '${(profile.weight! - profile.goalWeight!).abs().toStringAsFixed(1)} kg to go',
                       style: TextStyle(
                         fontSize: 14,
                         color: theme.colorScheme.primary,
@@ -911,7 +1142,6 @@ class _SummaryStep extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-
           // Info text
           Container(
             padding: const EdgeInsets.all(16),
