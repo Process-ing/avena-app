@@ -1,6 +1,6 @@
-import 'package:avena/model/pantry.dart';
+import 'package:avena/model/inventory.dart';
 import 'package:avena/model/week.dart';
-import 'package:avena/provider/pantry.dart';
+import 'package:avena/provider/inventory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:avena/model/pantry.dart';
+import 'package:avena/model/inventory.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pantry.g.dart';
