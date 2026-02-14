@@ -20,7 +20,7 @@ class _PantryScreenState extends State<PantryScreen>
     'Thursday',
     'Friday',
     'Saturday',
-    'Sunday'
+    'Sunday',
   ];
 
   // Inventory items with structured data
@@ -31,16 +31,41 @@ class _PantryScreenState extends State<PantryScreen>
     {'name': 'Pasta', 'quantity': 500.0, 'unit': 'g', 'category': 'Grains'},
     {'name': 'Olive Oil', 'quantity': 1.0, 'unit': 'L', 'category': 'Oils'},
     {'name': 'Salt', 'quantity': 500.0, 'unit': 'g', 'category': 'Spices'},
-    {'name': 'Black Pepper', 'quantity': 100.0, 'unit': 'g', 'category': 'Spices'},
-    {'name': 'Garlic', 'quantity': 200.0, 'unit': 'g', 'category': 'Vegetables'},
+    {
+      'name': 'Black Pepper',
+      'quantity': 100.0,
+      'unit': 'g',
+      'category': 'Spices',
+    },
+    {
+      'name': 'Garlic',
+      'quantity': 200.0,
+      'unit': 'g',
+      'category': 'Vegetables',
+    },
     {'name': 'Onions', 'quantity': 1.0, 'unit': 'kg', 'category': 'Vegetables'},
-    {'name': 'Tomatoes', 'quantity': 500.0, 'unit': 'g', 'category': 'Vegetables'},
+    {
+      'name': 'Tomatoes',
+      'quantity': 500.0,
+      'unit': 'g',
+      'category': 'Vegetables',
+    },
     {'name': 'Eggs', 'quantity': 12.0, 'unit': 'pcs', 'category': 'Dairy'},
     {'name': 'Milk', 'quantity': 2.0, 'unit': 'L', 'category': 'Dairy'},
     {'name': 'Butter', 'quantity': 250.0, 'unit': 'g', 'category': 'Dairy'},
     {'name': 'Cheese', 'quantity': 400.0, 'unit': 'g', 'category': 'Dairy'},
-    {'name': 'Chicken Breast', 'quantity': 1.0, 'unit': 'kg', 'category': 'Meat'},
-    {'name': 'Almond Butter', 'quantity': 1.0, 'unit': 'pcs', 'category': 'Other'},
+    {
+      'name': 'Chicken Breast',
+      'quantity': 1.0,
+      'unit': 'kg',
+      'category': 'Meat',
+    },
+    {
+      'name': 'Almond Butter',
+      'quantity': 1.0,
+      'unit': 'pcs',
+      'category': 'Other',
+    },
   ];
 
   // Sample recipes for different days
@@ -49,18 +74,23 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'Raspberry almond butter\nbowl',
         'subtitle': '(breakfast)',
-        'imageUrl': 'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=400',
         'ingredients': [
           {'text': '1 cup frozen raspberries', 'purchased': false},
           {'text': '1 frozen banana', 'purchased': false},
           {'text': '1 tablespoon almond butter', 'purchased': true},
-          {'text': '1 cup silk dairy-free almondmilk yogurt', 'purchased': false},
+          {
+            'text': '1 cup silk dairy-free almondmilk yogurt',
+            'purchased': false,
+          },
         ],
       },
       {
         'title': 'Ricotta heirloom tomato\ntart',
         'subtitle': '(lunch)',
-        'imageUrl': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
         'ingredients': [
           {'text': '38g finely ground cornmeal', 'purchased': false},
           {'text': '75g blanched almond flour', 'purchased': false},
@@ -72,7 +102,8 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'Avocado toast with\npoached egg',
         'subtitle': '(breakfast)',
-        'imageUrl': 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400',
         'ingredients': [
           {'text': '2 slices whole grain bread', 'purchased': false},
           {'text': '1 ripe avocado', 'purchased': false},
@@ -86,7 +117,8 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'Greek yogurt parfait',
         'subtitle': '(breakfast)',
-        'imageUrl': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
         'ingredients': [
           {'text': '2 cups Greek yogurt', 'purchased': false},
           {'text': '1 cup granola', 'purchased': false},
@@ -99,7 +131,8 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'Smoothie bowl',
         'subtitle': '(breakfast)',
-        'imageUrl': 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400',
         'ingredients': [
           {'text': '2 frozen bananas', 'purchased': false},
           {'text': '1 cup spinach', 'purchased': false},
@@ -112,7 +145,8 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'Pancakes with maple syrup',
         'subtitle': '(breakfast)',
-        'imageUrl': 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400',
         'ingredients': [
           {'text': '2 cups all-purpose flour', 'purchased': false},
           {'text': '2 tablespoons sugar', 'purchased': true},
@@ -126,7 +160,8 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'Eggs benedict',
         'subtitle': '(brunch)',
-        'imageUrl': 'https://images.unsplash.com/photo-1608039829572-78524f79ca0c?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1608039829572-78524f79ca0c?w=400',
         'ingredients': [
           {'text': '4 eggs', 'purchased': false},
           {'text': '2 English muffins', 'purchased': false},
@@ -140,7 +175,8 @@ class _PantryScreenState extends State<PantryScreen>
       {
         'title': 'French toast',
         'subtitle': '(breakfast)',
-        'imageUrl': 'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400',
         'ingredients': [
           {'text': '4 slices bread', 'purchased': false},
           {'text': '3 eggs', 'purchased': false},
@@ -211,7 +247,13 @@ class _PantryScreenState extends State<PantryScreen>
     // Remove leading numbers and units
     String cleaned = ingredientText
         .replaceAll(RegExp(r'^\d+\.?\d*\s*'), '') // Remove numbers at start
-        .replaceAll(RegExp(r'^(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|g|kg|ml|l|oz|lb|pcs|piece|pieces|slices?|frozen|fresh|ripe|whole|grain|all-purpose|dairy-free)\s+', caseSensitive: false), '');
+        .replaceAll(
+          RegExp(
+            r'^(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|g|kg|ml|l|oz|lb|pcs|piece|pieces|slices?|frozen|fresh|ripe|whole|grain|all-purpose|dairy-free)\s+',
+            caseSensitive: false,
+          ),
+          '',
+        );
 
     return cleaned.trim();
   }
@@ -253,10 +295,7 @@ class _PantryScreenState extends State<PantryScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildInventoryTab(),
-          _buildShoppingList(),
-        ],
+        children: [_buildInventoryTab(), _buildShoppingList()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentBottomIndex,
@@ -267,18 +306,9 @@ class _PantryScreenState extends State<PantryScreen>
           // TODO: Navigate to different screens based on index
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_stories),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket),
-            label: '',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.auto_stories), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_basket), label: ''),
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
@@ -333,7 +363,9 @@ class _PantryScreenState extends State<PantryScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Item'),
-        content: Text('Remove ${_inventoryItems[index]['name']} from inventory?'),
+        content: Text(
+          'Remove ${_inventoryItems[index]['name']} from inventory?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -399,10 +431,12 @@ class _PantryScreenState extends State<PantryScreen>
                           border: OutlineInputBorder(),
                         ),
                         items: ['kg', 'g', 'L', 'ml', 'pcs', 'cups']
-                            .map((unit) => DropdownMenuItem(
-                          value: unit,
-                          child: Text(unit),
-                        ))
+                            .map(
+                              (unit) => DropdownMenuItem(
+                                value: unit,
+                                child: Text(unit),
+                              ),
+                            )
                             .toList(),
                         onChanged: (value) {
                           setDialogState(() {
@@ -420,21 +454,24 @@ class _PantryScreenState extends State<PantryScreen>
                     labelText: 'Category',
                     border: OutlineInputBorder(),
                   ),
-                  items: [
-                    'Grains',
-                    'Dairy',
-                    'Meat',
-                    'Vegetables',
-                    'Fruits',
-                    'Spices',
-                    'Oils',
-                    'Other'
-                  ]
-                      .map((category) => DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  ))
-                      .toList(),
+                  items:
+                      [
+                            'Grains',
+                            'Dairy',
+                            'Meat',
+                            'Vegetables',
+                            'Fruits',
+                            'Spices',
+                            'Oils',
+                            'Other',
+                          ]
+                          .map(
+                            (category) => DropdownMenuItem(
+                              value: category,
+                              child: Text(category),
+                            ),
+                          )
+                          .toList(),
                   onChanged: (value) {
                     setDialogState(() {
                       selectedCategory = value!;
@@ -456,7 +493,7 @@ class _PantryScreenState extends State<PantryScreen>
                     _inventoryItems.add({
                       'name': nameController.text,
                       'quantity':
-                      double.tryParse(quantityController.text) ?? 1.0,
+                          double.tryParse(quantityController.text) ?? 1.0,
                       'unit': selectedUnit,
                       'category': selectedCategory,
                     });
@@ -510,8 +547,9 @@ class _PantryScreenState extends State<PantryScreen>
                         day,
                         style: TextStyle(
                           color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ),
@@ -525,34 +563,32 @@ class _PantryScreenState extends State<PantryScreen>
         Expanded(
           child: currentRecipes.isEmpty
               ? const Center(
-            child: Text(
-              'No recipes for this day',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          )
+                  child: Text(
+                    'No recipes for this day',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                )
               : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: currentRecipes.length,
-            itemBuilder: (context, index) {
-              final recipe = currentRecipes[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: RecipeCard(
-                  key: ValueKey('${selectedDay}_$index'),
-                  title: recipe['title'],
-                  subtitle: recipe['subtitle'],
-                  imageUrl: recipe['imageUrl'],
-                  ingredients: List<Map<String, dynamic>>.from(
-                      recipe['ingredients']),
-                  onRemove: () => _removeRecipe(selectedDay, index),
-                  checkInventory: _checkIngredientInInventory,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: currentRecipes.length,
+                  itemBuilder: (context, index) {
+                    final recipe = currentRecipes[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: RecipeCard(
+                        key: ValueKey('${selectedDay}_$index'),
+                        title: recipe['title'],
+                        subtitle: recipe['subtitle'],
+                        imageUrl: recipe['imageUrl'],
+                        ingredients: List<Map<String, dynamic>>.from(
+                          recipe['ingredients'],
+                        ),
+                        onRemove: () => _removeRecipe(selectedDay, index),
+                        checkInventory: _checkIngredientInInventory,
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
@@ -613,7 +649,8 @@ class _RecipeCardState extends State<RecipeCard> {
 
     final ingredientText = widget.ingredients[index]['text'] as String;
     final inInventory = widget.checkInventory(ingredientText);
-    final manuallyChecked = index < manuallyPurchased.length && manuallyPurchased[index];
+    final manuallyChecked =
+        index < manuallyPurchased.length && manuallyPurchased[index];
 
     return inInventory || manuallyChecked;
   }
@@ -647,7 +684,7 @@ class _RecipeCardState extends State<RecipeCard> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -660,29 +697,31 @@ class _RecipeCardState extends State<RecipeCard> {
           Container(
             height: 160,
             decoration: BoxDecoration(
-              borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               color: Colors.grey[300],
             ),
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Image.network(
                     widget.imageUrl,
                     width: double.infinity,
                     height: 160,
                     fit: BoxFit.cover,
                     colorBlendMode: BlendMode.darken,
-                    color: Colors.black.withValues(alpha:0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Center(
                         child: CircularProgressIndicator(
                           value: loadingProgress.expectedTotalBytes != null
                               ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
+                                    loadingProgress.expectedTotalBytes!
                               : null,
                         ),
                       );
@@ -691,8 +730,11 @@ class _RecipeCardState extends State<RecipeCard> {
                       return Container(
                         color: Colors.grey[300],
                         child: const Center(
-                          child: Icon(Icons.image_not_supported,
-                              size: 48, color: Colors.grey),
+                          child: Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
                         ),
                       );
                     },
@@ -739,10 +781,7 @@ class _RecipeCardState extends State<RecipeCard> {
               children: [
                 const Text(
                   'Portions',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Row(
                   children: [
@@ -789,7 +828,8 @@ class _RecipeCardState extends State<RecipeCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(widget.ingredients.length, (index) {
-                final originalText = widget.ingredients[index]['text'] as String;
+                final originalText =
+                    widget.ingredients[index]['text'] as String;
                 final scaledText = _scaleIngredient(originalText, portions);
                 final isPurchased = _isIngredientPurchased(index);
 
@@ -847,7 +887,8 @@ class _RecipeCardState extends State<RecipeCard> {
                     builder: (context) => AlertDialog(
                       title: const Text('Remove Recipe'),
                       content: Text(
-                          'Are you sure you want to remove "${widget.title.replaceAll('\n', ' ')}"?'),
+                        'Are you sure you want to remove "${widget.title.replaceAll('\n', ' ')}"?',
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
@@ -869,10 +910,7 @@ class _RecipeCardState extends State<RecipeCard> {
                 },
                 child: const Text(
                   'Remove',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(color: Colors.grey, fontSize: 15),
                 ),
               ),
             ),
@@ -958,10 +996,7 @@ class InventoryItemCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   category,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                 ),
               ],
             ),
