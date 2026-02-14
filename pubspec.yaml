@@ -39,6 +39,7 @@ dependencies:
   retrofit: ^4.9.2
   dio: ^5.9.1
   flutter_better_auth: ^0.1.3
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:
