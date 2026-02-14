@@ -6,6 +6,7 @@ part 'cook_book.g.dart';
 
 @riverpod
 class CookBookCategoryNotifier extends _$CookBookCategoryNotifier {
+  @override
   String? build() => null;
 
   void toggle(String category) {
@@ -15,6 +16,7 @@ class CookBookCategoryNotifier extends _$CookBookCategoryNotifier {
 
 @riverpod
 class CookBookPantryNotifier extends _$CookBookPantryNotifier {
+  @override
   bool build() => true;
 
   void toggle() {
