@@ -20,6 +20,7 @@ class _QAScreenState extends State<QAScreen> {
     'goalWeight': null,
     'healthGoal': null,
     'pace': null,
+    'activityLevel': null, // <-- NEW FIELD
     'meals': {},
     'restrictions': {},
   };
@@ -49,33 +50,39 @@ class _QAScreenState extends State<QAScreen> {
     return tmb;
   }
 
-  // Calculate TDEE (Total Daily Energy Expenditure) based on pace
+  // Calculate TDEE (Total Daily Energy Expenditure) based on activity level
   double? _calculateTDEE() {
     final tmb = _calculateTMB();
     if (tmb == null) return null;
 
-    final pace = _userData['pace'];
+    final activityLevel = _userData['activityLevel'];
     double activityFactor;
 
-    switch (pace) {
-      case 'Steady & Sustainable':
-        activityFactor = 1.375; // Light exercise
+    switch (activityLevel) {
+      case 'Sedentary':
+        activityFactor = 1.2;
         break;
-      case 'Balanced':
-        activityFactor = 1.55; // Moderate exercise
+      case 'Lightly Active':
+        activityFactor = 1.375;
         break;
-      case 'Intensive':
-        activityFactor = 1.725; // Heavy exercise
+      case 'Moderately Active':
+        activityFactor = 1.55;
+        break;
+      case 'Very Active':
+        activityFactor = 1.725;
+        break;
+      case 'Extra Active':
+        activityFactor = 1.9;
         break;
       default:
-        activityFactor = 1.55; // Default to moderate
+        activityFactor = 1.2; // Default to sedentary
     }
 
     return tmb * activityFactor;
   }
 
   void _nextPage() {
-    if (_currentPage < 5) {
+    if (_currentPage < 6) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -83,8 +90,8 @@ class _QAScreenState extends State<QAScreen> {
     } else {
       // Finish questionnaire
       // Navigator.pushReplacement(
-        // context,
-        // MaterialPageRoute(builder: (context) => const PantryScreen()),
+      // context,
+      // MaterialPageRoute(builder: (context) => const PantryScreen()),
       // );
     }
   }
@@ -112,7 +119,7 @@ class _QAScreenState extends State<QAScreen> {
           onPressed: _previousPage,
         ),
         title: Row(
-          children: List.generate(6, (index) {
+          children: List.generate(7, (index) { // Progress indicator update
             return Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -146,6 +153,10 @@ class _QAScreenState extends State<QAScreen> {
             userData: _userData,
           ),
           _PaceStep(
+            onNext: _nextPage,
+            userData: _userData,
+          ),
+          _ActivityLevelStep( // <-- NEW STEP
             onNext: _nextPage,
             userData: _userData,
           ),
@@ -513,7 +524,65 @@ class _PaceStepState extends State<_PaceStep> {
   }
 }
 
-// Step 4: Meals
+// Step 4: Activity Level  <-- NEW STEP
+class _ActivityLevelStep extends StatefulWidget {
+  final VoidCallback onNext;
+  final Map<String, dynamic> userData;
+
+  const _ActivityLevelStep({
+    required this.onNext,
+    required this.userData,
+  });
+
+  @override
+  State<_ActivityLevelStep> createState() => _ActivityLevelStepState();
+}
+
+class _ActivityLevelStepState extends State<_ActivityLevelStep> {
+  String? _selectedActivityLevel;
+  final Map<String, String> _activityLevels = {
+    'Sedentary': 'Little or no exercise',
+    'Lightly Active': 'Light exercise, 1-3 days/week',
+    'Moderately Active': 'Moderate exercise, 3-5 days/week',
+    'Very Active': 'Hard exercise, 6-7 days/week',
+    'Extra Active': 'Very hard exercise & physical job',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedActivityLevel = widget.userData['activityLevel'];
+  }
+
+  void _saveAndContinue() {
+    widget.userData['activityLevel'] = _selectedActivityLevel;
+    widget.onNext();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepContainer(
+      title: 'What is your activity level?',
+      subtitle: 'Pick your usual activity',
+      onNext: _saveAndContinue,
+      child: Column(
+        children: _activityLevels.entries.map((entry) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _OptionButtonWithSubtitle(
+              label: entry.key,
+              subtitle: entry.value,
+              isSelected: _selectedActivityLevel == entry.key,
+              onTap: () => setState(() => _selectedActivityLevel = entry.key),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// Step 5: Meals
 class _MealsStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
@@ -594,7 +663,7 @@ class _MealsStepState extends State<_MealsStep> {
   }
 }
 
-// Step 5: Restrictions
+// Step 6: Restrictions
 class _RestrictionsStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
@@ -678,7 +747,7 @@ class _RestrictionsStepState extends State<_RestrictionsStep> {
   }
 }
 
-// Step 6: Summary with TMB/TDEE
+// Step 7: Summary with TMB/TDEE
 class _SummaryStep extends StatelessWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
