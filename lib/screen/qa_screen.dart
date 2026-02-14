@@ -650,13 +650,6 @@ class _SummaryStep extends StatelessWidget {
                         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                     ]),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.amber[700]!.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -673,13 +666,6 @@ class _SummaryStep extends StatelessWidget {
                         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                     ]),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.amber[700]!.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ],
                 ),
               ],
