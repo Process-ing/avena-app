@@ -14,9 +14,9 @@ class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
   void _goToProfile(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ProfileScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
   }
 
   void _goToCookBook() {
@@ -37,10 +37,7 @@ class _MainShellState extends State<MainShell> {
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: pageList,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: pageList),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         selectedItemColor: Colors.black,

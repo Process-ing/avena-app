@@ -55,10 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: _addWeightEntry,
-            child: const Text('Add'),
-          ),
+          TextButton(onPressed: _addWeightEntry, child: const Text('Add')),
         ],
       ),
     );
@@ -72,9 +69,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _recalculateCalories() {
     // TODO: Navigate to Q&A screen
     // Navigator.push(context, MaterialPageRoute(builder: (_) => const QAScreen()));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Navigate to Q&A Screen')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Navigate to Q&A Screen')));
   }
 
   @override
@@ -82,23 +79,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userName = "Alice"; // TODO: Use real username
 
     // Calculate weight stats
-    final currentWeight = weightDiary.isNotEmpty ? weightDiary.last['weight'] as double : 0.0;
-    final startWeight = weightDiary.isNotEmpty ? weightDiary.first['weight'] as double : 0.0;
+    final currentWeight = weightDiary.isNotEmpty
+        ? weightDiary.last['weight'] as double
+        : 0.0;
+    final startWeight = weightDiary.isNotEmpty
+        ? weightDiary.first['weight'] as double
+        : 0.0;
     final weightChange = currentWeight - startWeight;
 
     // Prepare chart data
     final List<FlSpot> spots = weightDiary.asMap().entries.map((entry) {
-      return FlSpot(
-        entry.key.toDouble(),
-        (entry.value['weight'] as double),
-      );
+      return FlSpot(entry.key.toDouble(), (entry.value['weight'] as double));
     }).toList();
 
     final minWeight = weightDiary.isNotEmpty
-        ? (weightDiary.map((e) => e['weight'] as double).reduce((a, b) => a < b ? a : b) - 1.0).clamp(0.0, double.infinity)
+        ? (weightDiary
+                      .map((e) => e['weight'] as double)
+                      .reduce((a, b) => a < b ? a : b) -
+                  1.0)
+              .clamp(0.0, double.infinity)
         : 0.0;
     final maxWeight = weightDiary.isNotEmpty
-        ? (weightDiary.map((e) => e['weight'] as double).reduce((a, b) => a > b ? a : b) + 1.0).clamp(0.0, double.infinity)
+        ? (weightDiary
+                      .map((e) => e['weight'] as double)
+                      .reduce((a, b) => a > b ? a : b) +
+                  1.0)
+              .clamp(0.0, double.infinity)
         : 100.0;
 
     return Scaffold(
@@ -185,15 +191,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         children: [
                           Icon(
-                            weightChange < 0 ? Icons.trending_down : Icons.trending_up,
-                            color: weightChange < 0 ? Colors.green : Colors.orange,
+                            weightChange < 0
+                                ? Icons.trending_down
+                                : Icons.trending_up,
+                            color: weightChange < 0
+                                ? Colors.green
+                                : Colors.orange,
                             size: 20,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '${weightChange < 0 ? '' : '+'}${weightChange.toStringAsFixed(1)} kg',
                             style: TextStyle(
-                              color: weightChange < 0 ? Colors.green : Colors.orange,
+                              color: weightChange < 0
+                                  ? Colors.green
+                                  : Colors.orange,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -240,77 +252,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 180,
                   child: weightDiary.isEmpty
                       ? const Center(
-                    child: Text(
-                      'No weight entries yet',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
+                          child: Text(
+                            'No weight entries yet',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        )
                       : LineChart(
-                    LineChartData(
-                      minY: minWeight,
-                      maxY: maxWeight,
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          color: Colors.black,
-                          barWidth: 3,
-                          dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: Colors.black.withValues(alpha: 0.1),
-                          ),
-                        ),
-                      ],
-                      titlesData: FlTitlesData(
-                        leftTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            interval: weightDiary.length > 5 ? 2 : 1,
-                            getTitlesWidget: (value, meta) {
-                              final idx = value.round();
-                              if (idx < 0 || idx >= weightDiary.length) {
-                                return const SizedBox.shrink();
-                              }
-                              final date = weightDiary[idx]['date'] as DateTime;
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  "${date.day}/${date.month}",
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                          LineChartData(
+                            minY: minWeight,
+                            maxY: maxWeight,
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: spots,
+                                isCurved: true,
+                                color: Colors.black,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  color: Colors.black.withValues(alpha: 0.1),
                                 ),
-                              );
-                            },
+                              ),
+                            ],
+                            titlesData: FlTitlesData(
+                              leftTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: weightDiary.length > 5 ? 2 : 1,
+                                  getTitlesWidget: (value, meta) {
+                                    final idx = value.round();
+                                    if (idx < 0 || idx >= weightDiary.length) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    final date =
+                                        weightDiary[idx]['date'] as DateTime;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        "${date.day}/${date.month}",
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            gridData: FlGridData(
+                              show: true,
+                              drawVerticalLine: false,
+                              horizontalInterval: (maxWeight - minWeight) / 4,
+                              getDrawingHorizontalLine: (value) {
+                                return FlLine(
+                                  color: Colors.grey[200]!,
+                                  strokeWidth: 1,
+                                );
+                              },
+                            ),
+                            borderData: FlBorderData(show: false),
                           ),
                         ),
-                      ),
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        horizontalInterval: (maxWeight - minWeight) / 4,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey[200]!,
-                            strokeWidth: 1,
-                          );
-                        },
-                      ),
-                      borderData: FlBorderData(show: false),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -334,9 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: _showAddWeightDialog,
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.black,
-                ),
+                style: TextButton.styleFrom(foregroundColor: Colors.black),
               ),
             ],
           ),
@@ -371,10 +382,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 2),
                       Text(
                         '${date.day}/${date.month}/${date.year}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -395,10 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: const Icon(Icons.calculate, size: 20),
               label: const Text(
                 'Recalculate Calories',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.black,
@@ -420,10 +425,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: const Icon(Icons.logout, size: 20),
               label: const Text(
                 'Sign Out',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.grey[700],

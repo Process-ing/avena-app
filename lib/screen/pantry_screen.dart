@@ -10,7 +10,6 @@ class PantryScreen extends StatefulWidget {
 class _PantryScreenState extends State<PantryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _currentBottomIndex = 2;
   String selectedDay = 'Monday';
 
   final List<String> daysOfWeek = [
