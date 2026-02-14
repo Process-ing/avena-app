@@ -3,7 +3,7 @@ import 'package:avena/screen/login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp(),));
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -16,14 +16,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Inter',
-        scaffoldBackgroundColor: const Color(0xFFFAF8F3),
         colorScheme: ColorScheme.fromSeed(
           brightness: Brightness.light,
           seedColor: Colors.amber[700]!,
-          background: const Color(0xFFFAF8F3),
         ),
         appBarTheme: const AppBarTheme(
-          color: Colors.white,
+          // backgroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
