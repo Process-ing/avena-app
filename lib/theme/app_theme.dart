@@ -30,14 +30,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: textDark,
         ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          color: textDark,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: textDark,
-        ),
+        bodyLarge: TextStyle(fontSize: 16, color: textDark),
+        bodyMedium: TextStyle(fontSize: 14, color: textDark),
       ),
 
       // Input decoration theme
@@ -54,9 +48,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: textDark, width: 1.2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         hintStyle: TextStyle(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withValues(alpha: 0.4),
           fontWeight: FontWeight.normal,
         ),
         labelStyle: const TextStyle(color: Colors.black),
@@ -65,16 +62,13 @@ class AppTheme {
       // Filled button theme (for primary actions)
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: primaryBeige.withOpacity(0.5),
+          backgroundColor: primaryBeige.withValues(alpha: 0.5),
           foregroundColor: textDark,
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -82,16 +76,21 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: textDark,
-          backgroundColor: Colors.transparent, // Garante que é totalmente transparente
+          backgroundColor:
+              Colors.transparent, // Garante que é totalmente transparente
           elevation: 0, // Remove qualquer sombra residual
-          side: const BorderSide(color: textDark, width: 1.2), // Borda nítida para contraste
+          side: const BorderSide(
+            color: textDark,
+            width: 1.2,
+          ), // Borda nítida para contraste
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w600, // Um pouco mais de peso ajuda na leitura
+            fontWeight:
+                FontWeight.w600, // Um pouco mais de peso ajuda na leitura
           ),
         ),
       ),
@@ -108,16 +107,15 @@ class AppTheme {
           ),
           textStyle: const TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.w600, // Um pouco mais de peso para legibilidade no gradiente
+            fontWeight: FontWeight
+                .w600, // Um pouco mais de peso para legibilidade no gradiente
             letterSpacing: 0.5,
           ),
         ),
       ),
       // Checkbox theme
       checkboxTheme: CheckboxThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         side: const BorderSide(color: borderColor, width: 1.5),
       ),
 
@@ -143,11 +141,7 @@ class AppTheme {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           stops: [0.4, 1.0],
-          colors: [
-            Colors.white,
-           backgroundCream.withValues(alpha: 0.9),
-          ],
-
+          colors: [Colors.white, backgroundCream.withValues(alpha: 0.9)],
         ),
       ),
       child: child,

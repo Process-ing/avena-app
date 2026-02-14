@@ -43,8 +43,16 @@ class _QAScreenState extends State<QAScreen> {
       tmb = (10 * weight) + (6.25 * height) - (5 * age) - 161;
     } else {
       // For 'Other', use average of both formulas
-      tmb = ((10 * weight) + (6.25 * height) - (5 * age) + 5 +
-          (10 * weight) + (6.25 * height) - (5 * age) - 161) / 2;
+      tmb =
+          ((10 * weight) +
+              (6.25 * height) -
+              (5 * age) +
+              5 +
+              (10 * weight) +
+              (6.25 * height) -
+              (5 * age) -
+              161) /
+          2;
     }
 
     return tmb;
@@ -119,7 +127,8 @@ class _QAScreenState extends State<QAScreen> {
           onPressed: _previousPage,
         ),
         title: Row(
-          children: List.generate(7, (index) { // Progress indicator update
+          children: List.generate(7, (index) {
+            // Progress indicator update
             return Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -144,30 +153,16 @@ class _QAScreenState extends State<QAScreen> {
           });
         },
         children: [
-          _AboutYouStep(
+          _AboutYouStep(onNext: _nextPage, userData: _userData),
+          _HealthGoalStep(onNext: _nextPage, userData: _userData),
+          _PaceStep(onNext: _nextPage, userData: _userData),
+          _ActivityLevelStep(
+            // <-- NEW STEP
             onNext: _nextPage,
             userData: _userData,
           ),
-          _HealthGoalStep(
-            onNext: _nextPage,
-            userData: _userData,
-          ),
-          _PaceStep(
-            onNext: _nextPage,
-            userData: _userData,
-          ),
-          _ActivityLevelStep( // <-- NEW STEP
-            onNext: _nextPage,
-            userData: _userData,
-          ),
-          _MealsStep(
-            onNext: _nextPage,
-            userData: _userData,
-          ),
-          _RestrictionsStep(
-            onNext: _nextPage,
-            userData: _userData,
-          ),
+          _MealsStep(onNext: _nextPage, userData: _userData),
+          _RestrictionsStep(onNext: _nextPage, userData: _userData),
           _SummaryStep(
             onNext: _nextPage,
             userData: _userData,
@@ -220,10 +215,7 @@ class _StepContainer extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       subtitle!,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
                   ],
                   const SizedBox(height: 32),
@@ -272,10 +264,7 @@ class _AboutYouStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
 
-  const _AboutYouStep({
-    required this.onNext,
-    required this.userData,
-  });
+  const _AboutYouStep({required this.onNext, required this.userData});
 
   @override
   State<_AboutYouStep> createState() => _AboutYouStepState();
@@ -391,10 +380,7 @@ class _HealthGoalStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
 
-  const _HealthGoalStep({
-    required this.onNext,
-    required this.userData,
-  });
+  const _HealthGoalStep({required this.onNext, required this.userData});
 
   @override
   State<_HealthGoalStep> createState() => _HealthGoalStepState();
@@ -403,7 +389,12 @@ class _HealthGoalStep extends StatefulWidget {
 class _HealthGoalStepState extends State<_HealthGoalStep> {
   String? _selectedGoal;
   late TextEditingController _goalWeightController;
-  final List<String> _goals = ['Lose Weight', 'Stay Fit', 'Build Muscle', 'Eat Healthier'];
+  final List<String> _goals = [
+    'Lose Weight',
+    'Stay Fit',
+    'Build Muscle',
+    'Eat Healthier',
+  ];
 
   @override
   void initState() {
@@ -423,7 +414,9 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
   void _saveAndContinue() {
     widget.userData['healthGoal'] = _selectedGoal;
     if (_selectedGoal == 'Lose Weight') {
-      widget.userData['goalWeight'] = double.tryParse(_goalWeightController.text);
+      widget.userData['goalWeight'] = double.tryParse(
+        _goalWeightController.text,
+      );
     }
     widget.onNext();
   }
@@ -473,10 +466,7 @@ class _PaceStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
 
-  const _PaceStep({
-    required this.onNext,
-    required this.userData,
-  });
+  const _PaceStep({required this.onNext, required this.userData});
 
   @override
   State<_PaceStep> createState() => _PaceStepState();
@@ -529,10 +519,7 @@ class _ActivityLevelStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
 
-  const _ActivityLevelStep({
-    required this.onNext,
-    required this.userData,
-  });
+  const _ActivityLevelStep({required this.onNext, required this.userData});
 
   @override
   State<_ActivityLevelStep> createState() => _ActivityLevelStepState();
@@ -587,10 +574,7 @@ class _MealsStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
 
-  const _MealsStep({
-    required this.onNext,
-    required this.userData,
-  });
+  const _MealsStep({required this.onNext, required this.userData});
 
   @override
   State<_MealsStep> createState() => _MealsStepState();
@@ -644,7 +628,9 @@ class _MealsStepState extends State<_MealsStep> {
               title: Text(
                 meal,
                 style: TextStyle(
-                  fontWeight: _meals[meal]! ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: _meals[meal]!
+                      ? FontWeight.w600
+                      : FontWeight.normal,
                   color: Colors.black87,
                 ),
               ),
@@ -668,10 +654,7 @@ class _RestrictionsStep extends StatefulWidget {
   final VoidCallback onNext;
   final Map<String, dynamic> userData;
 
-  const _RestrictionsStep({
-    required this.onNext,
-    required this.userData,
-  });
+  const _RestrictionsStep({required this.onNext, required this.userData});
 
   @override
   State<_RestrictionsStep> createState() => _RestrictionsStepState();
@@ -695,7 +678,9 @@ class _RestrictionsStepState extends State<_RestrictionsStep> {
     super.initState();
     if (widget.userData['restrictions'] != null &&
         (widget.userData['restrictions'] as Map).isNotEmpty) {
-      _restrictions.addAll(Map<String, bool>.from(widget.userData['restrictions']));
+      _restrictions.addAll(
+        Map<String, bool>.from(widget.userData['restrictions']),
+      );
     }
   }
 
@@ -728,7 +713,9 @@ class _RestrictionsStepState extends State<_RestrictionsStep> {
               title: Text(
                 restriction,
                 style: TextStyle(
-                  fontWeight: _restrictions[restriction]! ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: _restrictions[restriction]!
+                      ? FontWeight.w600
+                      : FontWeight.normal,
                   color: Colors.black87,
                 ),
               ),
@@ -876,7 +863,8 @@ class _SummaryStep extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Goal summary
-          if (userData['healthGoal'] == 'Lose Weight' && userData['goalWeight'] != null) ...[
+          if (userData['healthGoal'] == 'Lose Weight' &&
+              userData['goalWeight'] != null) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -894,10 +882,7 @@ class _SummaryStep extends StatelessWidget {
                       children: [
                         const Text(
                           'Weight Goal',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -911,7 +896,8 @@ class _SummaryStep extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (userData['weight'] != null && userData['goalWeight'] != null)
+                  if (userData['weight'] != null &&
+                      userData['goalWeight'] != null)
                     Text(
                       '${(userData['weight'] - userData['goalWeight']).abs().toStringAsFixed(1)} kg to go',
                       style: TextStyle(
