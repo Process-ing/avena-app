@@ -25,24 +25,37 @@ class _QAScreenState extends State<QAScreen> {
     final weight = _userData['weight'];
     final height = _userData['height'];
     if (gender == null || age == null || weight == null || height == null) return null;
-    if (gender == 'Male') return (10 * weight) + (6.25 * height) - (5 * age) + 5;
-    if (gender == 'Female') return (10 * weight) + (6.25 * height) - (5 * age) - 161;
-    return (((10 * weight) + (6.25 * height) - (5 * age) + 5
-        + 10 * weight + 6.25 * height - 5 * age - 161) / 2);
+    if (age is! num || age <= 0 || weight is! num || weight <= 0 || height is! num || height <= 0) return null;
+
+    double tmb;
+    if (gender == 'Male') {
+      tmb = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+    } else if (gender == 'Female') {
+      tmb = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+    } else {
+      tmb = (((10 * weight) + (6.25 * height) - (5 * age) + 5
+          + 10 * weight + 6.25 * height - 5 * age - 161) / 2);
+    }
+    // Clamp to >= 0
+    if (tmb <= 0) return null;
+    return tmb;
   }
 
   double? _calculateTDEE() {
     final tmb = _calculateTMB();
     if (tmb == null) return null;
     final activityLevel = _userData['activityLevel'];
+    double activityFactor;
     switch (activityLevel) {
-      case 'Sedentary':        return tmb * 1.2;
-      case 'Lightly Active':   return tmb * 1.375;
-      case 'Moderately Active':return tmb * 1.55;
-      case 'Very Active':      return tmb * 1.725;
-      case 'Extra Active':     return tmb * 1.9;
-      default:                 return tmb * 1.2;
+      case 'Sedentary':        activityFactor = 1.2; break;
+      case 'Lightly Active':   activityFactor = 1.375; break;
+      case 'Moderately Active':activityFactor = 1.55; break;
+      case 'Very Active':      activityFactor = 1.725; break;
+      case 'Extra Active':     activityFactor = 1.9; break;
+      default:                 activityFactor = 1.2;
     }
+    final tdee = tmb * activityFactor;
+    return tdee > 0 ? tdee : null;
   }
 
   void _nextPage() {
@@ -224,9 +237,11 @@ class _AboutYouStepState extends State<_AboutYouStep> {
     final age = double.tryParse(_ageController.text);
     final weight = double.tryParse(_weightController.text);
     final height = double.tryParse(_heightController.text);
-    if (_selectedGender == null || age == null || weight == null || height == null) {
+    if (_selectedGender == null ||
+        age == null || weight == null || height == null ||
+        age <= 0   || weight <= 0  || height <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill out all fields with valid numbers.')),
+        const SnackBar(content: Text('Please fill all fields with valid positive numbers.')),
       );
       return;
     }
