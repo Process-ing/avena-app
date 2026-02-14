@@ -760,10 +760,6 @@ class _SummaryStep extends StatelessWidget {
                         color: theme.colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        Icons.bedtime,
-                        color: theme.colorScheme.primary,
-                      ),
                     ),
                   ],
                 ),
@@ -801,10 +797,6 @@ class _SummaryStep extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.directions_run,
-                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ],
