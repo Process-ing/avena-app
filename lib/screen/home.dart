@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:avena/screen/profile.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required void Function() onProfilePressed});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -116,33 +116,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildDayTab(context, progress: 0.45, kcal: "540/1200 kCal", meals: demoMeals),
             ...daysOfWeek.skip(1).map((day) => _buildDayPlaceholder(day)).toList(),
           ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentBottomIndex,
-          onTap: (index) {
-            setState(() {
-              _currentBottomIndex = index;
-            });
-            // TODO: Implement navigation to other screens if needed
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.auto_stories),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_basket),
-              label: '',
-            ),
-          ],
-          selectedItemColor: Colors.black,
-          unselectedItemColor: Colors.grey,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
         ),
       ),
     );
