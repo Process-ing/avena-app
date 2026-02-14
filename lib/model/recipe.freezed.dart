@@ -531,6 +531,10 @@ String toString() {
   return 'Recipe(id: $id, name: $name, description: $description, category: $category, cuisine: $cuisine, difficulty: $difficulty, ingredients: $ingredients, instructions: $instructions, meta: $meta, dietary: $dietary, nutrition: $nutrition, storage: $storage, equipment: $equipment, troubleshooting: $troubleshooting, chefNotes: $chefNotes, culturalContext: $culturalContext, tags: $tags)';
 }
 
+  @override
+  // TODO: implement calories
+  int? get calories => throw UnimplementedError();
+
 
 }
 

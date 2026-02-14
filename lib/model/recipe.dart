@@ -28,4 +28,6 @@ abstract class Recipe with _$Recipe {
     required String culturalContext,
     required List<Tag> tags,
   }) = _Recipe;
+
+  int? get calories => null;
 }

@@ -3,9 +3,13 @@ import 'package:avena/provider/category.dart';
 import 'package:avena/provider/cook_book.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:avena/screen/recipe.dart';
+
 
 class CookBookScreen extends ConsumerWidget {
-  const CookBookScreen({super.key, required void Function() onProfilePressed});
+  final void Function() onProfilePressed;
+
+  const CookBookScreen({super.key, required this.onProfilePressed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,9 +32,12 @@ class CookBookScreen extends ConsumerWidget {
         centerTitle: true,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.grey[300],
-            child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+          child: GestureDetector(
+            onTap: onProfilePressed,
+            child: CircleAvatar(
+              backgroundColor: Colors.grey[300],
+              child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+            ),
           ),
         ),
         title: const Text(
@@ -156,37 +163,52 @@ class CookBookRecipeList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemBuilder: (context, index) => Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(
-              child: Image.network(
-                "https://picsum.photos/800/450",
-                fit: BoxFit.cover,
-              ),
-            ),
-            Container(
-              color: Colors.black.withValues(alpha: 0.3),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text(
-                recipes[index].name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: () {
+           Navigator.push(
+             context,
+             MaterialPageRoute(
+               builder: (_) => RecipeDetailScreen(
+                 recipeName: recipes[index].name,
+                 recipeImage: "https://picsum.photos/800/450", // TODO: Use actual recipe image
+                 mealType: recipes[index].category ?? 'Recipe',
+                 calories: recipes[index].calories ?? 0,
+               ),
+             ),
+           );
+        },
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned.fill(
+                child: Image.network(
+                  "https://picsum.photos/800/450",
+                  fit: BoxFit.cover,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              Container(
+                color: Colors.black.withValues(alpha: 0.3),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  recipes[index].name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       separatorBuilder: (_, __) => const SizedBox(height: 8),
