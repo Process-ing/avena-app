@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PantryScreen extends StatefulWidget {
-  const PantryScreen({super.key});
+  const PantryScreen({super.key, required void Function() onProfilePressed});
 
   @override
   State<PantryScreen> createState() => _PantryScreenState();
@@ -296,24 +296,6 @@ class _PantryScreenState extends State<PantryScreen>
       body: TabBarView(
         controller: _tabController,
         children: [_buildInventoryTab(), _buildShoppingList()],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentBottomIndex,
-        onTap: (index) {
-          setState(() {
-            _currentBottomIndex = index;
-          });
-          // TODO: Navigate to different screens based on index
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.auto_stories), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_basket), label: ''),
-        ],
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
       ),
     );
   }
