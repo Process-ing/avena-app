@@ -319,6 +319,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
   /*
   Widget _buildSocialButton({
     String? label,
