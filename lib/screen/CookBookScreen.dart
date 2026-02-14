@@ -6,10 +6,11 @@ class CookBookScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Cook Book')),
-      body: Column(
-        children: [
-          Row(
+      appBar: AppBar(
+        title: Text('Cook Book'),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(40),
+          child: Row(
             children: [
               Expanded(
                 child: SizedBox(
@@ -73,34 +74,32 @@ class CookBookScreen extends StatelessWidget {
               SizedBox(width: 8),
             ],
           ),
-          Expanded(
-            child: ListView.builder(
-              itemBuilder: (context, index) => Card(
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  alignment: AlignmentGeometry.center,
-                  children: [
-                    Positioned.fill(
-                      child: Image.network(
-                        "https://picsum.photos/800/450",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsetsGeometry.all(32),
-                      child: Text(
-                        'Recipe title very nice',
-                        style: Theme.of(context).primaryTextTheme.displayLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+        ),
+      ),
+      body: ListView.builder(
+        itemBuilder: (context, index) => Card(
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            alignment: AlignmentGeometry.center,
+            children: [
+              Positioned.fill(
+                child: Image.network(
+                  "https://picsum.photos/800/450",
+                  fit: BoxFit.cover,
                 ),
               ),
-              itemCount: 1000,
-            ),
+              Padding(
+                padding: EdgeInsetsGeometry.all(32),
+                child: Text(
+                  'Recipe title very nice',
+                  style: Theme.of(context).primaryTextTheme.displayLarge,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+        itemCount: 1000,
       ),
     );
   }
