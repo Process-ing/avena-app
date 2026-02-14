@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:avena/screen/q&a_screen.dart';
+import 'package:avena/screen/qa_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
