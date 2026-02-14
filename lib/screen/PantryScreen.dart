@@ -393,7 +393,7 @@ class _PantryScreenState extends State<PantryScreen>
                     const SizedBox(width: 8),
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: selectedUnit,
+                        initialValue: selectedUnit,
                         decoration: const InputDecoration(
                           labelText: 'Unit',
                           border: OutlineInputBorder(),
@@ -415,7 +415,7 @@ class _PantryScreenState extends State<PantryScreen>
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     border: OutlineInputBorder(),
@@ -647,7 +647,7 @@ class _RecipeCardState extends State<RecipeCard> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -675,7 +675,7 @@ class _RecipeCardState extends State<RecipeCard> {
                     height: 160,
                     fit: BoxFit.cover,
                     colorBlendMode: BlendMode.darken,
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha:0.3),
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Center(
