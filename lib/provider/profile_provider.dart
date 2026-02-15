@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../model/user_profile_model.dart';
 import 'api.dart';
-import 'auth.dart';
 
 part 'profile_provider.g.dart';
 
@@ -9,17 +8,21 @@ part 'profile_provider.g.dart';
 class Questionnaire extends _$Questionnaire {
   @override
   UserProfile build() {
-    print('🔄 QUESTIONNAIRE PROVIDER BUILD CALLED');
     return UserProfile();
   }
-
-  /// Updates the current state using the copyWith pattern
+  /// Converte qualquer String ou lista de Strings para minúsculas
+  dynamic _clean(dynamic value) {
+    if (value is String) return value.toLowerCase();
+    if (value is List<String>) return value.map((e) => e.toLowerCase()).toList();
+    if (value is Map<String, bool>) {
+      return value.entries
+          .where((e) => e.value == true)
+          .map((e) => e.key.toLowerCase())
+          .toList();
+    }
+    return value;
+  }
   void updateData(UserProfile newData) {
-    print('📝 UPDATE DATA CALLED');
-    print('   Previous state: Gender=${state.gender}, Age=${state.age}, Weight=${state.weight}');
-    print('   New data: Gender=${newData.gender}, Age=${newData.age}, Weight=${newData.weight}');
-
-    // Merge new data with existing state, preserving non-null values
     state = UserProfile(
       gender: newData.gender ?? state.gender,
       age: newData.age ?? state.age,
@@ -31,10 +34,7 @@ class Questionnaire extends _$Questionnaire {
       activityLevel: newData.activityLevel ?? state.activityLevel,
       meals: newData.meals.isNotEmpty ? newData.meals : state.meals,
       restrictions: newData.restrictions.isNotEmpty ? newData.restrictions : state.restrictions,
-    );
-
-    print('   Current state after update: Gender=${state.gender}, Age=${state.age}, Weight=${state.weight}');
-  }
+    );}
 
   /// Calculate Basal Metabolic Rate (BMR/TMB) using Mifflin-St Jeor Equation
   double? calculateTMB() {
@@ -129,35 +129,36 @@ class Questionnaire extends _$Questionnaire {
 
   /// Final API call to save the questionnaire results
   Future<void> saveProfile() async {
-    // Validate that we have enough data
-    if (!state.canCalculateMetrics) {
-      throw Exception('Incomplete profile data. Please fill all required fields.');
-    }
-
     final dio = ref.read(dioProvider);
 
-    // Build payload with calculated values
-    final payload = state.toJson();
-    payload['tmb'] = calculateTMB();
-    payload['tdee'] = calculateTDEE();
-    payload['recommendedCalories'] = calculateRecommendedCalories();
-    payload['weeksToGoal'] = calculateWeeksToGoal();
+    // Montamos o payload exatamente como no teu exemplo de curl
+    final payload = {
+      "gender": _clean(state.gender),
+      "age": state.age ?? 0,
+      "weight": state.weight ?? 0,
+      "height": state.height ?? 0,
+      "activityLevel": _clean(state.activityLevel),
+      "healthGoal": _clean(state.healthGoal),
+      "meals": _clean(state.meals),
+      "dietaryRestrictions": _clean(state.restrictions), // Se usares restrições
+    };
 
     try {
-      final response = await dio.post(
-        '/user/setup-profile',
+      print('📤 Enviando PATCH para /user/profile: $payload');
+
+      final response = await dio.patch(
+        '/user/profile',
         data: payload,
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to save profile: ${response.statusMessage}');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ Perfil atualizado com sucesso!');
       }
-
-      // Safety check before continuing after async gap
-      if (!ref.mounted) return;
     } catch (e) {
-      // Re-throw with more context
-      throw Exception('Error saving profile: $e');
+      print('❌ Erro ao guardar perfil: $e');
+      // Se der 401 aqui, lembra-te de fazer Sign Out e Sign In novamente
+      // para o CookieManager capturar a sessão.
+      throw Exception('Falha na comunicação com o servidor.');
     }
   }
 

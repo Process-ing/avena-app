@@ -327,12 +327,6 @@ class _AboutYouStepState extends ConsumerState<_AboutYouStep> {
       ),
     );
 
-    print('=== SAVED ABOUT YOU ===');
-    print('Gender: $_selectedGender');
-    print('Age: $age');
-    print('Weight: $weight');
-    print('Height: $height');
-
     widget.onNext();
   }
 
@@ -486,10 +480,6 @@ class _HealthGoalStepState extends ConsumerState<_HealthGoalStep> {
       ),
     );
 
-    print('=== SAVED HEALTH GOAL ===');
-    print('Goal: $_selectedGoal');
-    print('Goal Weight: $goalWeight');
-
     widget.onNext();
   }
 
@@ -577,9 +567,6 @@ class _PaceStepState extends ConsumerState<_PaceStep> {
       currentProfile.copyWith(pace: _selectedPace),
     );
 
-    print('=== SAVED PACE ===');
-    print('Pace: $_selectedPace');
-
     widget.onNext();
   }
 
@@ -654,9 +641,6 @@ class _ActivityLevelStepState extends ConsumerState<_ActivityLevelStep> {
     notifier.updateData(
       currentProfile.copyWith(activityLevel: _selectedActivityLevel),
     );
-
-    print('=== SAVED ACTIVITY LEVEL ===');
-    print('Activity Level: $_selectedActivityLevel');
 
     widget.onNext();
   }
@@ -734,9 +718,6 @@ class _MealsStepState extends ConsumerState<_MealsStep> {
     notifier.updateData(
       currentProfile.copyWith(meals: Map<String, bool>.from(_meals)),
     );
-
-    print('=== SAVED MEALS ===');
-    print('Meals: $_meals');
 
     widget.onNext();
   }
@@ -841,9 +822,6 @@ class _RestrictionsStepState extends ConsumerState<_RestrictionsStep> {
       ),
     );
 
-    print('=== SAVED RESTRICTIONS ===');
-    print('Restrictions: $_restrictions');
-
     widget.onNext();
   }
 
@@ -913,18 +891,6 @@ class _SummaryStep extends ConsumerWidget {
     final recommendedCalories = notifier.calculateRecommendedCalories();
     final weeksToGoal = notifier.calculateWeeksToGoal();
 
-    // Debug: Print profile data to see what's available
-    print('=== PROFILE DATA ===');
-    print('Gender: ${profile.gender}');
-    print('Age: ${profile.age}');
-    print('Weight: ${profile.weight}');
-    print('Height: ${profile.height}');
-    print('Activity Level: ${profile.activityLevel}');
-    print('Health Goal: ${profile.healthGoal}');
-    print('TMB: $tmb');
-    print('TDEE: $tdee');
-    print('==================');
-
     return _StepContainer(
       title: 'Your Personalized Plan',
       subtitle: 'Based on your information',
@@ -933,7 +899,6 @@ class _SummaryStep extends ConsumerWidget {
       isLoading: isSaving,
       child: Column(
         children: [
-          // Show warning if data is incomplete
           if (tmb == null || tdee == null) ...[
             Container(
               padding: const EdgeInsets.all(16),
