@@ -90,7 +90,6 @@ class _QAScreenState extends ConsumerState<QAScreen> {
           children: [
             _AboutYouStep(profile.value, profileNotifier, _nextPage),
             _HealthGoalStep(profile.value, profileNotifier, _nextPage),
-            _PaceStep(profile.value, profileNotifier, _nextPage),
             _ActivityLevelStep(profile.value, profileNotifier, _nextPage),
             _MealsStep(profile.value, profileNotifier, _nextPage),
             _RestrictionsStep(profile.value, profileNotifier, _nextPage),
@@ -391,39 +390,7 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
   }
 }
 
-// Step 3: Pace
-class _PaceStep extends StatelessWidget {
-  final UserProfile profile;
-  final UserProfileNotifier profileNotifier;
-  final VoidCallback onNext;
-
-  const _PaceStep(this.profile, this.profileNotifier, this.onNext);
-
-  @override
-  Widget build(BuildContext context) {
-    return _StepContainer(
-      title: 'How fast do you want to get there?',
-      subtitle: 'Choose your preferred pace',
-      onNext: onNext,
-      finished: profile.finishedStep(QAStep.pace),
-      child: Column(
-        spacing: 12,
-        children: Pace.values
-            .map(
-              (pace) => _OptionButtonWithSubtitle(
-                label: pace.name,
-                subtitle: pace.description,
-                isSelected: profile.pace == pace,
-                onTap: () => profileNotifier.updateData(pace: pace),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
-// Step 4: Activity Level
+// Step 3: Activity Level
 class _ActivityLevelStep extends StatelessWidget {
   final UserProfile profile;
   final UserProfileNotifier profileNotifier;
@@ -455,7 +422,7 @@ class _ActivityLevelStep extends StatelessWidget {
   }
 }
 
-// Step 5: Meals
+// Step 4: Meals
 class _MealsStep extends StatelessWidget {
   final UserProfile profile;
   final UserProfileNotifier profileNotifier;
@@ -514,7 +481,7 @@ class _MealsStep extends StatelessWidget {
   }
 }
 
-// Step 6: Restrictions
+// Step 5: Restrictions
 class _RestrictionsStep extends StatelessWidget {
   final UserProfile profile;
   final UserProfileNotifier profileNotifier;
@@ -572,7 +539,7 @@ class _RestrictionsStep extends StatelessWidget {
   }
 }
 
-// Step 7: Summary with TMB/TDEE
+// Step 6: Summary with TMB/TDEE
 class _SummaryStep extends StatelessWidget {
   final UserProfile profile;
   final UserProfileNotifier profileNotifier;
