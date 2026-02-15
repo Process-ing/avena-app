@@ -464,12 +464,13 @@ class _MealsStep extends StatelessWidget {
               ),
               value: selected,
               onChanged: (value) {
+                final updatedMeals = [...profile.meals];
                 if (value == true) {
-                  profile.meals.add(meal);
+                  updatedMeals.add(meal);
                 } else {
-                  profile.meals.remove(meal);
+                  updatedMeals.remove(meal);
                 }
-                profileNotifier.updateData(meals: profile.meals);
+                profileNotifier.updateData(meals: updatedMeals);
               },
               controlAffinity: ListTileControlAffinity.trailing,
               activeColor: Colors.amber[700],
