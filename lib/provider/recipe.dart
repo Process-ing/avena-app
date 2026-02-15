@@ -12,7 +12,18 @@ Future<List<Recipe>> recipes(Ref ref) async {
   final authenticatedUser = await ref.watch(authenticatedUserProvider.future);
   if (authenticatedUser == null) throw Exception();
 
-  return await api.suggestRecipes(true);
+  final result = await api.suggestRecipes(true);
+  print('Raw recipe result: $result');
+
+  final recipes = <Recipe>[];
+  for (final recipe in result['mealPlan']['meals'].values) {
+    try {
+      recipes.add(Recipe.fromJson(recipe));
+    } catch (e) {
+      print('Error parsing recipe: $e');
+    }
+  }
+  return recipes;
 }
 
 // TODO
@@ -33,6 +44,9 @@ Future<List<Recipe>> filteredRecipes(
 
   // TODO: Filter by pantry
   return recipes
-      .where((recipe) => category == null || recipe.category == category)
+      .where((recipe) {
+        print('Checking recipe: ${recipe.category}');
+        return category == null || recipe.category == category.toLowerCase();
+      })
       .toList(growable: false);
 }

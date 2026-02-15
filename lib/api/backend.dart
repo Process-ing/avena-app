@@ -1,6 +1,5 @@
 import 'package:avena/model/user_profile_model.dart';
 import 'package:avena/model/ingredient.dart';
-import 'package:avena/model/recipe.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -17,7 +16,7 @@ abstract class BackendApi {
   Future<UserProfile> updateUserProfile(@Body() UserProfile profile);
 
   @POST("suggest-recipes/")
-  Future<List<Recipe>> suggestRecipes(
+  Future<dynamic> suggestRecipes(
     @BodyExtra("ignoreInventory") bool ignoreInventory,
   );
 

@@ -22,7 +22,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   int portions = 1;
 
   // Sample recipe data - replace with actual data
-  final List<String> tags = ['Vegan', 'Paleo', 'Breakfast'];
+  final List<String> tags = [];
   final int prepTimeMinutes = 5;
 
   final List<String> ingredients = [

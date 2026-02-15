@@ -1,6 +1,7 @@
 import 'package:avena/model/recipe.dart';
 import 'package:avena/provider/category.dart';
 import 'package:avena/provider/cook_book.dart';
+import 'package:avena/screen/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -147,8 +148,16 @@ class CookBookScreen extends ConsumerWidget {
       ),
       body: recipes.map(
         data: (recipes) => CookBookRecipeList(recipes.value),
-        error: (error) => const Center(child: Text('Error loading recipes')),
-        loading: (_) => const Center(child: CircularProgressIndicator()),
+        error: (error) {
+          print('Error loading recipes: $error');
+
+          return const Center(
+            child: Text('Error loading recipes'),
+          );
+        },
+        loading: (_) => const Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
     );
   }
@@ -165,19 +174,17 @@ class CookBookRecipeList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) => GestureDetector(
         onTap: () {
-          // Navigate to recipe detail screen
-          // TODO: Import recipe_detail_screen.dart and Recipe model
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (_) => RecipeDetailScreen(
-          //       recipeName: recipes[index].name,
-          //       recipeImage: "https://picsum.photos/800/450", // TODO: Use actual recipe image
-          //       mealType: recipes[index].category ?? 'Recipe',
-          //       calories: recipes[index].calories ?? 0,
-          //     ),
-          //   ),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RecipeDetailScreen(
+                recipeName: recipes[index].name,
+                recipeImage: "https://picsum.photos/800/450",
+                mealType: recipes[index].category,
+                calories: recipes[index].calories,
+              ),
+            ),
+          );
         },
         child: Card(
           clipBehavior: Clip.antiAlias,

@@ -53,9 +53,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password must be at least 6 characters'),
-        ),
+        const SnackBar(content: Text('Password must be at least 6 characters')),
       );
       return;
     }

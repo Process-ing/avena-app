@@ -7,8 +7,7 @@ part 'ingredient.g.dart';
 enum Unit {
   kilogram('kg'),
   liter('l'),
-  @JsonValue(null)
-  parcel('pcs');
+  parcel('');
 
   const Unit(this.name);
   final String name;

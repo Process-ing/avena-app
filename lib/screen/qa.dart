@@ -556,7 +556,7 @@ class _SummaryStep extends StatelessWidget {
       subtitle: 'Based on your information',
       onNext: onNext,
       buttonText: 'Get Started',
-      finished: profile.finishedStep(QAStep.summary),
+      finished: true,
       child: Column(
         children: [
           // TMB/TDEE Card
