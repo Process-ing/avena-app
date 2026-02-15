@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:avena/screen/profile.dart';
 import 'package:avena/screen/recipe.dart';
 
 
