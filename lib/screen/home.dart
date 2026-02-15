@@ -1,3 +1,4 @@
+import 'package:avena/model/recipe.dart';
 import 'package:flutter/material.dart';
 import 'package:avena/screen/recipe.dart';
 
@@ -50,6 +51,32 @@ final Map<String, List<Map<String, dynamic>>> mealsByDay = {
   "Sunday": [],
 };
 
+// Helper function to convert meal data to Recipe object
+Recipe _mealToRecipe(Map<String, dynamic> meal) {
+  return Recipe(
+    id: meal['title'] ?? '',
+    name: meal['title'] ?? '',
+    description: '',
+    category: meal['label'] ?? '',
+    cuisine: '',
+    difficulty: '',
+    calories: meal['calories'] ?? 0,
+    totalTime: '',
+    activeTime: '',
+    yields: '1',
+    proteinG: 0,
+    fatG: 0,
+    carbsG: 0,
+    fiberG: 0,
+    isVegetarian: false,
+    isVegan: false,
+    isGlutenFree: false,
+    tags: [],
+    ingredients: [],
+    coverageScore: 0,
+  );
+}
+
 class HomeScreen extends StatefulWidget {
   final void Function() onProfilePressed;
   final void Function() onNavigateToCookbook;
@@ -86,8 +113,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final todayMeals = mealsByDay[selectedDay] ?? [];
-
     // TODO: Replace with actual calorie data
     final caloriesConsumed = 1450.0;
     final caloriesTotal = 2000.0;
@@ -239,12 +264,7 @@ class _MealCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => RecipeDetailScreen(
-              recipeName: meal['title'] ?? '',
-              recipeImage: meal['image'] ?? '',
-              mealType: meal['label'] ?? '',
-              calories: meal['calories'] ?? 0,
-            ),
+            builder: (_) => RecipeDetailScreen(recipe: _mealToRecipe(meal)),
           ),
         );
       },

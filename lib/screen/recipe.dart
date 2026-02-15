@@ -1,18 +1,10 @@
+import 'package:avena/model/recipe.dart';
 import 'package:flutter/material.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
-  final String recipeName;
-  final String recipeImage;
-  final String mealType;
-  final int calories;
+  final Recipe recipe;
 
-  const RecipeDetailScreen({
-    super.key,
-    required this.recipeName,
-    required this.recipeImage,
-    required this.mealType,
-    required this.calories,
-  });
+  const RecipeDetailScreen({super.key, required this.recipe});
 
   @override
   State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
@@ -21,43 +13,21 @@ class RecipeDetailScreen extends StatefulWidget {
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   int portions = 1;
 
-  // Sample recipe data - replace with actual data
-  final List<String> tags = [];
-  final int prepTimeMinutes = 5;
+  List<String> get _dietaryTags {
+    final tags = <String>[];
+    if (widget.recipe.isVegan) tags.add('Vegan');
+    if (widget.recipe.isVegetarian) tags.add('Vegetarian');
+    if (widget.recipe.isGlutenFree) tags.add('Gluten-Free');
+    tags.addAll(widget.recipe.tags);
+    return tags;
+  }
 
-  final List<String> ingredients = [
-    '1 cup frozen raspberries',
-    '1 frozen banana',
-    '1 tablespoon almond butter',
-    '1 cup silk dairy-free almondmilk yogurt',
-  ];
-
-  final List<String> steps = [
-    'Add frozen raspberries and banana to a high-speed blender.',
-    'Pour in the almond milk yogurt.',
-    'Blend on high until smooth and creamy, scraping down the sides as needed.',
-    'Transfer the smoothie bowl to a serving bowl.',
-    'Top with almond butter and your favorite toppings.',
-    'Serve immediately and enjoy!',
-  ];
-
-  String _scaleIngredient(String ingredient, int portions) {
-    // Simple scaling - in production, parse and scale quantities
-    final regex = RegExp(r'^(\d+\.?\d*)\s*(.*)');
-    final match = regex.firstMatch(ingredient);
-
-    if (match != null) {
-      final amount = double.parse(match.group(1)!);
-      final rest = match.group(2)!;
-      final scaled = amount * portions;
-
-      if (scaled % 1 == 0) {
-        return '${scaled.toInt()} $rest';
-      } else {
-        return '${scaled.toStringAsFixed(1)} $rest';
-      }
-    }
-    return ingredient;
+  String _formatIngredient(double quantity, String unit, String name) {
+    final scaledQty = quantity * portions;
+    final qtyStr = scaledQty % 1 == 0
+        ? scaledQty.toInt().toString()
+        : scaledQty.toStringAsFixed(1);
+    return unit.isEmpty ? '$qtyStr $name' : '$qtyStr $unit $name';
   }
 
   @override
@@ -103,7 +73,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    widget.recipeImage,
+                    "https://picsum.photos/800/450",
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -125,7 +95,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     right: 16,
                     child: Wrap(
                       spacing: 8,
-                      children: tags
+                      children: _dietaryTags
                           .map(
                             (tag) => Container(
                               padding: const EdgeInsets.symmetric(
@@ -165,7 +135,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    widget.recipeName,
+                    widget.recipe.name,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -175,35 +145,92 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                // Description
+                if (widget.recipe.description.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Text(
+                      widget.recipe.description,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
 
-                // Nutrition Info - Only Prep Time and Calories
+                const SizedBox(height: 12),
+
+                // Recipe Info Chips
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      _buildNutritionCard('Prep time', '$prepTimeMinutes min'),
-                      const SizedBox(width: 12),
-                      _buildNutritionCard('Calories', '${widget.calories} cal'),
+                      _buildInfoChip(Icons.restaurant, widget.recipe.category),
+                      _buildInfoChip(Icons.public, widget.recipe.cuisine),
+                      _buildInfoChip(Icons.speed, widget.recipe.difficulty),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Nutrition Info
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _buildNutritionCard('Time', widget.recipe.totalTime),
+                      _buildNutritionCard('Active', widget.recipe.activeTime),
+                      _buildNutritionCard(
+                        'Calories',
+                        '${widget.recipe.calories} cal',
+                      ),
+                      _buildNutritionCard(
+                        'Protein',
+                        '${widget.recipe.proteinG}g',
+                      ),
+                      _buildNutritionCard('Carbs', '${widget.recipe.carbsG}g'),
+                      _buildNutritionCard('Fat', '${widget.recipe.fatG}g'),
+                      _buildNutritionCard('Fiber', '${widget.recipe.fiberG}g'),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Portions
+                // Yields and Portions
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Portions',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Portions',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            'Yields: ${widget.recipe.yields}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -259,7 +286,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...ingredients.map(
+                      ...widget.recipe.ingredients.map(
                         (ingredient) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
@@ -279,7 +306,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               ),
                               Expanded(
                                 child: Text(
-                                  _scaleIngredient(ingredient, portions),
+                                  _formatIngredient(
+                                    ingredient.quantity,
+                                    ingredient.unit.name,
+                                    ingredient.name,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 15,
                                     color: Colors.grey[800],
@@ -291,59 +322,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Steps
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Instructions',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...steps.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final step = entry.value;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${index + 1}',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  step,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.grey[800],
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
                     ],
                   ),
                 ),
@@ -357,37 +335,60 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.grey[700]),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[800],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNutritionCard(String label, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey[200]!),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

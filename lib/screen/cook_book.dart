@@ -173,12 +173,7 @@ class CookBookRecipeList extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => RecipeDetailScreen(
-                recipeName: recipes[index].name,
-                recipeImage: "https://picsum.photos/800/450",
-                mealType: recipes[index].category,
-                calories: recipes[index].calories,
-              ),
+              builder: (_) => RecipeDetailScreen(recipe: recipes[index]),
             ),
           );
         },
