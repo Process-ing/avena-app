@@ -104,7 +104,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset('logo.png'),
+                Image.asset('assets/logo.png'),
                 const SizedBox(height: 24),
 
                 // Title
