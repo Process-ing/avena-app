@@ -3,8 +3,6 @@ import 'package:avena/provider/category.dart';
 import 'package:avena/provider/cook_book.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:avena/screen/recipe.dart';
-
 
 class CookBookScreen extends ConsumerWidget {
   final void Function() onProfilePressed;
@@ -56,79 +54,79 @@ class CookBookScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Row(
                   children: [
-                    const SizedBox(width: 16),
-                    // Spacer to push chips to the right
-                    const Spacer(),
-                    // Category chips
-                    SizedBox(
-                      height: 40,
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          final current = categories[index];
-                          final isSelected = current == category;
+                    // Category chips - scrollable from left edge
+                    Expanded(
+                      child: SizedBox(
+                        height: 40,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemBuilder: (context, index) {
+                            final current = categories[index];
+                            final isSelected = current == category;
 
-                          return GestureDetector(
-                            onTap: () => categoryNotifier.toggle(current),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected ? Colors.black : Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: isSelected ? Colors.black : Colors.grey[300]!,
+                            return GestureDetector(
+                              onTap: () => categoryNotifier.toggle(current),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? Colors.black : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isSelected ? Colors.black : Colors.grey[300]!,
+                                  ),
+                                ),
+                                child: Text(
+                                  current,
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.black87,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                current,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.black87,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemCount: categories.length,
+                            );
+                          },
+                          separatorBuilder: (_, __) => const SizedBox(width: 8),
+                          itemCount: categories.length,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    // Separator and Pantry chip on the right
                     const SizedBox(height: 40, child: VerticalDivider(width: 1)),
                     const SizedBox(width: 8),
-                    // Pantry chip
-                    GestureDetector(
-                      onTap: () => pantryNotifier.toggle(),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: pantry ? Colors.black : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: pantry ? Colors.black : Colors.grey[300]!,
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: GestureDetector(
+                        onTap: () => pantryNotifier.toggle(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                        ),
-                        child: Text(
-                          'Pantry',
-                          style: TextStyle(
-                            color: pantry ? Colors.white : Colors.black87,
-                            fontWeight: pantry
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                          decoration: BoxDecoration(
+                            color: pantry ? Colors.black : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: pantry ? Colors.black : Colors.grey[300]!,
+                            ),
+                          ),
+                          child: Text(
+                            'Pantry',
+                            style: TextStyle(
+                              color: pantry ? Colors.white : Colors.black87,
+                              fontWeight: pantry
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
                   ],
                 ),
               ),
@@ -165,17 +163,19 @@ class CookBookRecipeList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) => GestureDetector(
         onTap: () {
-           Navigator.push(
-             context,
-             MaterialPageRoute(
-               builder: (_) => RecipeDetailScreen(
-                 recipeName: recipes[index].name,
-                 recipeImage: "https://picsum.photos/800/450", // TODO: Use actual recipe image
-                 mealType: recipes[index].category ?? 'Recipe',
-                 calories: recipes[index].calories ?? 0,
-               ),
-             ),
-           );
+          // Navigate to recipe detail screen
+          // TODO: Import recipe_detail_screen.dart and Recipe model
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (_) => RecipeDetailScreen(
+          //       recipeName: recipes[index].name,
+          //       recipeImage: "https://picsum.photos/800/450", // TODO: Use actual recipe image
+          //       mealType: recipes[index].category ?? 'Recipe',
+          //       calories: recipes[index].calories ?? 0,
+          //     ),
+          //   ),
+          // );
         },
         child: Card(
           clipBehavior: Clip.antiAlias,

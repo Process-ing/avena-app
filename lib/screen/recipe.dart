@@ -24,11 +24,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   // Sample recipe data - replace with actual data
   final List<String> tags = ['Vegan', 'Paleo', 'Breakfast'];
   final int prepTimeMinutes = 5;
-  final Map<String, String> nutritionInfo = {
-    'Carbs': '50g',
-    'Fat': '0g',
-    'Protein': '40g',
-  };
 
   final List<String> ingredients = [
     '1 cup frozen raspberries',
@@ -104,17 +99,46 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Image.network(
-                widget.recipeImage,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: Icon(Icons.image, size: 64, color: Colors.grey),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    widget.recipeImage,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(Icons.image, size: 64, color: Colors.grey),
+                        ),
+                      );
+                    },
+                  ),
+                  // Tags at bottom of image
+                  Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: Wrap(
+                      spacing: 8,
+                      children: tags.map((tag) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          tag,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      )).toList(),
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
           ),
@@ -124,23 +148,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tags
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                  child: Wrap(
-                    spacing: 8,
-                    children: tags.map((tag) => Chip(
-                      label: Text(
-                        tag,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      backgroundColor: Colors.grey[100],
-                      side: BorderSide.none,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    )).toList(),
-                  ),
-                ),
+                const SizedBox(height: 16),
 
                 // Recipe Title
                 Padding(
@@ -158,18 +166,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                 const SizedBox(height: 20),
 
-                // Nutrition Info Grid
+                // Nutrition Info - Only Prep Time and Calories
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
                       _buildNutritionCard('Prep time', '$prepTimeMinutes min'),
                       const SizedBox(width: 12),
-                      _buildNutritionCard('Carbs', nutritionInfo['Carbs']!),
-                      const SizedBox(width: 12),
-                      _buildNutritionCard('Fat', nutritionInfo['Fat']!),
-                      const SizedBox(width: 12),
-                      _buildNutritionCard('Protein', nutritionInfo['Protein']!),
+                      _buildNutritionCard('Calories', '${widget.calories} cal'),
                     ],
                   ),
                 ),
@@ -250,8 +254,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              width: 6,
-                              height: 6,
+                              width: 4,
+                              height: 4,
                               margin: const EdgeInsets.only(top: 8, right: 12),
                               decoration: const BoxDecoration(
                                 color: Colors.black,
@@ -301,24 +305,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 28,
-                                height: 28,
-                                margin: const EdgeInsets.only(right: 12),
-                                decoration: BoxDecoration(
+                              Text(
+                                '${index + 1}',
+                                style: const TextStyle(
                                   color: Colors.black,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '${index + 1}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
                                   step,
@@ -349,32 +344,31 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   Widget _buildNutritionCard(String label, String value) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: Colors.grey[200]!),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               value,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
