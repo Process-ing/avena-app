@@ -1,16 +1,13 @@
-import 'package:flutter/material.dart';
-// 1. Importa o teu ecrã de login (ajusta o caminho se necessário)
+import 'package:avena/model/initial.dart';
+import 'package:avena/provider/initial.dart';
+import 'package:avena/screen/home.dart';
+import 'package:avena/screen/qa_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:avena/screen/login_screen.dart';
 
 void main() {
-  runApp(
-    // ⚠️ IMPORTANTE: ProviderScope é obrigatório para Riverpod funcionar!
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +22,30 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: LoadingScreen(),
     );
+  }
+}
+
+class LoadingScreen extends ConsumerWidget {
+  const LoadingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(initialStateProvider, (_, state) {
+      if (state.hasValue) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => switch (state.value!) {
+              InitialState.authenticate => LoginScreen(),
+              InitialState.qa => QAScreen(),
+              InitialState.home => HomeScreen(),
+            },
+          ),
+        );
+      }
+    });
+
+    return Scaffold();
   }
 }
