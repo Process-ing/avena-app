@@ -44,9 +44,6 @@ Future<List<Recipe>> filteredRecipes(
 
   // TODO: Filter by pantry
   return recipes
-      .where((recipe) {
-        print('Checking recipe: ${recipe.category}');
-        return category == null || recipe.category == category.toLowerCase();
-      })
+      .where((recipe) =>  category == null || recipe.category == category)
       .toList(growable: false);
 }
