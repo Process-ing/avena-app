@@ -39,14 +39,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         password.isEmpty ||
         confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha todos os campos')),
+        const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
 
     if (!email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, insira um email válido')),
+        const SnackBar(content: Text('Please enter a valid email')),
       );
       return;
     }
@@ -54,7 +54,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('A password deve ter pelo menos 6 caracteres'),
+          content: Text('Password must be at least 6 characters'),
         ),
       );
       return;
