@@ -33,7 +33,10 @@ class AuthenticatedUser extends _$AuthenticatedUser {
       final client = await ref.read(betterAuthClientProvider.future);
 
       // The Async Gap: This network call takes time
-      final result = await client.signIn.email(email: email, password: password);
+      final result = await client.signIn.email(
+        email: email,
+        password: password,
+      );
 
       // FIX: Check if the provider is still active before updating state
       if (!ref.mounted) return;

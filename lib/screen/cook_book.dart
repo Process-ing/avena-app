@@ -73,16 +73,22 @@ class CookBookScreen extends ConsumerWidget {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? Colors.black : Colors.white,
+                                  color: isSelected
+                                      ? Colors.black
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: isSelected ? Colors.black : Colors.grey[300]!,
+                                    color: isSelected
+                                        ? Colors.black
+                                        : Colors.grey[300]!,
                                   ),
                                 ),
                                 child: Text(
                                   current,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black87,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.black87,
                                     fontWeight: isSelected
                                         ? FontWeight.w600
                                         : FontWeight.normal,
@@ -97,7 +103,10 @@ class CookBookScreen extends ConsumerWidget {
                       ),
                     ),
                     // Separator and Pantry chip on the right
-                    const SizedBox(height: 40, child: VerticalDivider(width: 1)),
+                    const SizedBox(
+                      height: 40,
+                      child: VerticalDivider(width: 1),
+                    ),
                     const SizedBox(width: 8),
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
@@ -131,22 +140,15 @@ class CookBookScreen extends ConsumerWidget {
                 ),
               ),
               // Divider line
-              Container(
-                height: 1,
-                color: Colors.grey[300],
-              ),
+              Container(height: 1, color: Colors.grey[300]),
             ],
           ),
         ),
       ),
       body: recipes.map(
         data: (recipes) => CookBookRecipeList(recipes.value),
-        error: (error) => const Center(
-          child: Text('Error loading recipes'),
-        ),
-        loading: (_) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        error: (error) => const Center(child: Text('Error loading recipes')),
+        loading: (_) => const Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -192,9 +194,7 @@ class CookBookRecipeList extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              Container(
-                color: Colors.black.withValues(alpha: 0.3),
-              ),
+              Container(color: Colors.black.withValues(alpha: 0.3)),
               Padding(
                 padding: const EdgeInsets.all(32),
                 child: Text(

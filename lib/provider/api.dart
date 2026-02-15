@@ -20,32 +20,33 @@ Dio dio(Ref ref) {
     ),
   );
 
-  dio.interceptors.add(InterceptorsWrapper(
-    onResponse: (Response response, ResponseInterceptorHandler handler) {
-      // Handle plain text error responses by converting them to JSON
-      if (response.data is String && response.statusCode != null && response.statusCode! >= 400) {
-        response.data = {
-          'error': {
-            'message': response.data,
-            'status': response.statusCode,
-          }
-        };
-      }
-      handler.next(response);
-    },
-    onError: (DioException error, ErrorInterceptorHandler handler) {
-      // Handle plain text error responses in error cases too
-      if (error.response?.data is String) {
-        error.response?.data = {
-          'error': {
-            'message': error.response?.data ?? 'Unknown error',
-            'status': error.response?.statusCode,
-          }
-        };
-      }
-      handler.next(error);
-    },
-  ));
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onResponse: (Response response, ResponseInterceptorHandler handler) {
+        // Handle plain text error responses by converting them to JSON
+        if (response.data is String &&
+            response.statusCode != null &&
+            response.statusCode! >= 400) {
+          response.data = {
+            'error': {'message': response.data, 'status': response.statusCode},
+          };
+        }
+        handler.next(response);
+      },
+      onError: (DioException error, ErrorInterceptorHandler handler) {
+        // Handle plain text error responses in error cases too
+        if (error.response?.data is String) {
+          error.response?.data = {
+            'error': {
+              'message': error.response?.data ?? 'Unknown error',
+              'status': error.response?.statusCode,
+            },
+          };
+        }
+        handler.next(error);
+      },
+    ),
+  );
 
   return dio;
 }
