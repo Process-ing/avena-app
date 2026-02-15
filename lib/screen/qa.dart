@@ -522,12 +522,13 @@ class _RestrictionsStep extends StatelessWidget {
               ),
               value: selected,
               onChanged: (value) {
+                final updatedRestrictions = [...profile.restrictions];
                 if (value == true) {
-                  profile.restrictions.add(restriction);
+                  updatedRestrictions.add(restriction);
                 } else {
-                  profile.restrictions.remove(restriction);
+                  updatedRestrictions.remove(restriction);
                 }
-                profileNotifier.updateData(restrictions: profile.restrictions);
+                profileNotifier.updateData(restrictions: updatedRestrictions);
               },
               controlAffinity: ListTileControlAffinity.trailing,
               activeColor: Colors.amber[700],
