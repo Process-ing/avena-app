@@ -33,7 +33,7 @@ Future<void> signUp(
 final signOutMutation = Mutation();
 
 Future<void> signOut(MutationTarget ref) async {
-  await signInMutation.run(ref, (transaction) async {
+  await signOutMutation.run(ref, (transaction) async {
     final auth = transaction.get(authenticatedUserProvider.notifier);
 
     await auth.signOut();
