@@ -1,7 +1,7 @@
+import 'package:avena/mutation/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:avena/screen/qa_screen.dart';
-import 'package:avena/provider/auth.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -17,7 +17,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -35,7 +34,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final confirmPassword = _confirmPasswordController.text;
 
     // Validações
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos')),
       );
@@ -51,58 +53,39 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('A password deve ter pelo menos 6 caracteres')),
+        const SnackBar(
+          content: Text('A password deve ter pelo menos 6 caracteres'),
+        ),
       );
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    try {
-      // Chama o backend através do provider
-      await ref.read(authenticatedUserProvider.notifier).signUp(
-        name: name,
-        email: email,
-        password: password,
-      );
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Conta criada com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Navega para o questionário
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const QAScreen()),
-      );
-
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao criar conta: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    await signUp(ref, name: name, email: email, password: password);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(signUpMutation, (_, state) {
+      if (state.hasError) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not sign up')));
+      } else if (state.isSuccess) {
+        Navigator.of(
+          context,
+        ).pushReplacement(new MaterialPageRoute(builder: (_) => QAScreen()));
+      }
+    });
+
+    final signUpState = ref.watch(signUpMutation);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F3),
       appBar: AppBar(
@@ -182,7 +165,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       // Name Field
                       TextField(
                         controller: _nameController,
-                        enabled: !_isLoading,
+                        enabled: !signUpState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Full Name',
                           hintText: 'Enter your name',
@@ -213,7 +196,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !_isLoading,
+                        enabled: !signUpState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'Enter your email',
@@ -244,7 +227,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        enabled: !_isLoading,
+                        enabled: !signUpState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Password',
                           hintText: 'Create a password',
@@ -288,7 +271,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       TextField(
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
-                        enabled: !_isLoading,
+                        enabled: !signUpState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
                           hintText: 'Re-enter your password',
@@ -306,7 +289,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             onPressed: () {
                               setState(() {
                                 _obscureConfirmPassword =
-                                !_obscureConfirmPassword;
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),
@@ -333,7 +316,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _onSignUp,
+                          onPressed: signUpState.isPending ? null : _onSignUp,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[700],
                             foregroundColor: Colors.white,
@@ -342,22 +325,22 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: _isLoading
+                          child: signUpState.isPending
                               ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : const Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                                  'Sign Up',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                     ],

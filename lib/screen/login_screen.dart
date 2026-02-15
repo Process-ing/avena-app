@@ -1,7 +1,8 @@
+import 'package:avena/mutation/auth.dart';
+import 'package:avena/screen/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:avena/screen/sign_up_screen.dart';
-import 'package:avena/provider/auth.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +15,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -34,42 +34,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    try {
-      // Chama o backend através do provider
-      await ref.read(authenticatedUserProvider.notifier).signIn(
-        email: email,
-        password: password,
-      );
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login efetuado com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // TODO: Navegar para Home ou Questionário
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
-
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao entrar: ${e.toString()}')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    await signIn(ref, email: email, password: password);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(signInMutation, (_, state) {
+      if (state.hasError) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not sign in')));
+      } else if (state.isSuccess) {
+        Navigator.of(
+          context,
+        ).pushReplacement(new MaterialPageRoute(builder: (_) => HomeScreen()));
+      }
+    });
+
+    final signInState = ref.watch(signInMutation);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F3),
       body: SafeArea(
@@ -80,9 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset(
-                  'assets/logo.png',
-                ),
+                Image.asset('assets/logo.png'),
                 const SizedBox(height: 32),
 
                 // App Name
@@ -124,7 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !_isLoading,
+                        enabled: !signInState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'Enter your email',
@@ -155,7 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        enabled: !_isLoading,
+                        enabled: !signInState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Password',
                           hintText: 'Enter your password',
@@ -199,7 +180,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _onLogin,
+                          onPressed: signInState.isPending ? null : _onLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[700],
                             foregroundColor: Colors.white,
@@ -208,22 +189,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: _isLoading
+                          child: signInState.isPending
                               ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
                               : const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
