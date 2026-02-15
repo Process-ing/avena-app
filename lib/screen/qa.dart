@@ -14,7 +14,7 @@ class QAScreen extends ConsumerStatefulWidget {
 class _QAScreenState extends ConsumerState<QAScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  static const _pageCount = 7;
+  static const _pageCount = 6;
 
   void _nextPage() {
     if (_currentPage < _pageCount - 1) {

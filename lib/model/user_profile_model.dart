@@ -131,7 +131,6 @@ abstract class UserProfile with _$UserProfile {
       height != null &&
       healthGoal != null &&
       (healthGoal != HealthGoal.loseWeight || goalWeight != null) &&
-      pace != null &&
       activityLevel != null &&
       meals.isNotEmpty;
 
