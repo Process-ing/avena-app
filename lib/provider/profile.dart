@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../model/user_profile_model.dart';
 import 'api.dart';
 
-part 'profile_provider.g.dart';
+part 'profile.g.dart';
 
 @Riverpod(keepAlive: true)
 class UserProfileNotifier extends _$UserProfileNotifier {
