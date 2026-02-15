@@ -72,21 +72,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    "https://picsum.photos/800/450",
+                  Image.asset(
+                    'assets/food.jpg',
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[300],
-                        child: const Center(
-                          child: Icon(
-                            Icons.image,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      );
-                    },
                   ),
                   // Tags at bottom of image
                   Positioned(

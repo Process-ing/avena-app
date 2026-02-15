@@ -187,10 +187,10 @@ class CookBookRecipeList extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               Positioned.fill(
-                child: Image.network(
-                  "https://picsum.photos/800/450",
+                child: Image.asset(
+                  'assets/food.jpg',
                   fit: BoxFit.cover,
-                ),
+                )
               ),
               Container(color: Colors.black.withValues(alpha: 0.3)),
               Padding(
