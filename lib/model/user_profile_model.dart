@@ -1,83 +1,169 @@
-class UserProfile {
-  final String? gender;
-  final double? age;
-  final double? weight;
-  final double? height;
-  final String? healthGoal;
-  final double? goalWeight;
-  final String? pace;
-  final String? activityLevel;
-  final Map<String, bool> meals;
-  final Map<String, bool> restrictions;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  UserProfile({
-    this.gender,
-    this.age,
-    this.weight,
-    this.height,
-    this.healthGoal,
-    this.goalWeight,
-    this.pace,
-    this.activityLevel,
-    this.meals = const {},
-    this.restrictions = const {},
-  });
+part 'user_profile_model.freezed.dart';
+part 'user_profile_model.g.dart';
 
-  /// Converts the object to JSON for your API call
-  Map<String, dynamic> toJson() {
-    return {
-      'gender': gender,
-      'age': age,
-      'weight': weight,
-      'height': height,
-      'healthGoal': healthGoal,
-      'goalWeight': goalWeight,
-      'pace': pace,
-      'activityLevel': activityLevel,
-      'meals': meals.entries.where((e) => e.value).map((e) => e.key).toList(),
-      'restrictions':
-      restrictions.entries.where((e) => e.value).map((e) => e.key).toList(),
-    };
-  }
+enum Gender {
+  male("Male", 5),
+  female("Female", -161),
+  other("Other", -78);
 
-  /// Helper to update state in Riverpod
-  UserProfile copyWith({
-    String? gender,
-    double? age,
+  const Gender(this.name, this.offset);
+  final String name;
+  final double offset;
+}
+
+enum HealthGoal {
+  loseWeight("Lose Weight", -500),
+  buildMuscle("Build Muscle", 300),
+  stayFit("Stay Fit", 0),
+  eatHealthier("Eat Healthier", 0);
+
+  const HealthGoal(this.name, this.offset);
+  final String name;
+  final double offset;
+}
+
+enum Pace {
+  intensive("Intensive", "Fast results, strict plan", 0.7),
+  balanced("Balanced", "Moderate pace with flexibility", 1),
+  steady("Steady & Sustainable", "Fast results, strict plan", 1.3);
+
+  const Pace(this.name, this.description, this.factor);
+  final String name;
+  final String description;
+  final double factor;
+}
+
+enum ActivityLevel {
+  sedentary("Sedentary", 'Little or no exercise', 1.2),
+  lightlyActive("Lightly Active", 'Light exercise, 1-3 days/week', 1.375),
+  moderatelyActive(
+    "Moderately Active",
+    'Moderate exercise, 3-5 days/week',
+    1.55,
+  ),
+  veryActive("Very Active", 'Hard exercise, 6-7 days/week', 1.725),
+  extraActive("Extra Active", 'Very hard exercise & physical job', 1.9);
+
+  const ActivityLevel(this.name, this.description, this.factor);
+  final String name;
+  final String description;
+  final double factor;
+}
+
+enum Meal {
+  breakfast("Breakfast"),
+  brunch("Brunch"),
+  lunch("Lunch"),
+  afternoonSnack("Afternoon Snack"),
+  dinner("Dinner"),
+  midnightSnack("Midnight Snack");
+
+  const Meal(this.name);
+  final String name;
+}
+
+enum Restriction {
+  gluten('Gluten-free'),
+  dairy('Dairy-free'),
+  nut('Nut-free'),
+  shellfish('Shellfish-free'),
+  vegetarian('Vegetarian'),
+  vegan('Vegan'),
+  pescatarian('Pescatarian'),
+  pork('No Pork'),
+  alcohol('No Alcohol');
+
+  const Restriction(this.name);
+  final String name;
+}
+
+enum QAStep {
+  aboutYou,
+  healthGoal,
+  pace,
+  activityLevel,
+  meals,
+  restrictions,
+  summary,
+}
+
+@freezed
+abstract class UserProfile with _$UserProfile {
+  const UserProfile._();
+
+  const factory UserProfile({
+    Gender? gender,
+    int? age,
     double? weight,
     double? height,
-    String? healthGoal,
+    HealthGoal? healthGoal,
     double? goalWeight,
-    String? pace,
-    String? activityLevel,
-    Map<String, bool>? meals,
-    Map<String, bool>? restrictions,
-  }) {
-    return UserProfile(
-      gender: gender ?? this.gender,
-      age: age ?? this.age,
-      weight: weight ?? this.weight,
-      height: height ?? this.height,
-      healthGoal: healthGoal ?? this.healthGoal,
-      goalWeight: goalWeight ?? this.goalWeight,
-      pace: pace ?? this.pace,
-      activityLevel: activityLevel ?? this.activityLevel,
-      meals: meals ?? this.meals,
-      restrictions: restrictions ?? this.restrictions,
-    );
+    Pace? pace,
+    ActivityLevel? activityLevel,
+    @Default([Meal.breakfast, Meal.lunch, Meal.dinner]) Set<Meal> meals,
+    @Default([]) Set<Restriction> restrictions,
+  }) = _UserProfile;
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileFromJson(json);
+
+  bool get finished =>
+      gender != null &&
+      age != null &&
+      weight != null &&
+      height != null &&
+      healthGoal != null &&
+      (healthGoal != HealthGoal.loseWeight || goalWeight != null) &&
+      pace != null &&
+      activityLevel != null &&
+      meals.isNotEmpty;
+
+  double? get bmr {
+    if (weight == null || height == null || age == null || gender == null) {
+      return null;
+    }
+
+    return (10 * weight!) + (6.25 * height!) - (5 * age!) + gender!.offset;
   }
 
-  /// Validate if basic info is complete
-  bool get hasBasicInfo =>
-      gender != null && age != null && weight != null && height != null;
+  double? get tdee {
+    if (activityLevel == null || bmr == null) return null;
 
-  /// Validate if health goal is complete
-  bool get hasHealthGoal => healthGoal != null;
+    return bmr! * activityLevel!.factor;
+  }
 
-  /// Validate if activity level is set
-  bool get hasActivityLevel => activityLevel != null;
+  double? get recommendedCalories {
+    if (healthGoal == null || tdee == null) return null;
 
-  /// Check if profile is complete enough to calculate metrics
-  bool get canCalculateMetrics =>
-      hasBasicInfo && hasActivityLevel;
+    return tdee! + healthGoal!.offset;
+  }
+
+  double? get weeksToGoal {
+    if (healthGoal != HealthGoal.loseWeight ||
+        weight == null ||
+        goalWeight == null ||
+        pace == null) {
+      return null;
+    }
+
+    final weightDifference = (weight! - goalWeight!).abs();
+    final weeksNeeded = weightDifference / 0.5;
+
+    return weeksNeeded * pace!.factor;
+  }
+
+  bool finishedStep(QAStep step) => switch (step) {
+    QAStep.aboutYou =>
+      gender != null && age != null && weight != null && height != null,
+    QAStep.healthGoal =>
+      healthGoal != null &&
+          (healthGoal != HealthGoal.loseWeight && goalWeight != null),
+    QAStep.pace => pace != null,
+    QAStep.activityLevel => activityLevel != null,
+    QAStep.meals => meals.isNotEmpty,
+    QAStep.restrictions => true,
+    QAStep.summary => finished,
+  };
 }

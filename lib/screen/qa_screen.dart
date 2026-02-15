@@ -1,7 +1,8 @@
+import 'package:avena/model/user_profile_model.dart';
+import 'package:avena/screen/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/profile_provider.dart';
-import '../model/user_profile_model.dart';
 
 class QAScreen extends ConsumerStatefulWidget {
   const QAScreen({super.key});
@@ -13,7 +14,6 @@ class QAScreen extends ConsumerStatefulWidget {
 class _QAScreenState extends ConsumerState<QAScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  bool _isSaving = false;
 
   void _nextPage() {
     if (_currentPage < 6) {
@@ -23,49 +23,9 @@ class _QAScreenState extends ConsumerState<QAScreen> {
       );
     } else {
       // Finish questionnaire and save to backend
-      _saveProfile();
-    }
-  }
-
-  Future<void> _saveProfile() async {
-    if (_isSaving) return;
-
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      await ref.read(questionnaireProvider.notifier).saveProfile();
-
-      if (!mounted) return;
-
-      // Navigate to next screen after successful save
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => const PantryScreen()),
-      // );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile saved successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving profile: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
     }
   }
 
@@ -88,6 +48,9 @@ class _QAScreenState extends ConsumerState<QAScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(userProfileProvider);
+    final profileNotifier = ref.watch(userProfileProvider.notifier);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F3),
       appBar: AppBar(
@@ -95,7 +58,7 @@ class _QAScreenState extends ConsumerState<QAScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: _isSaving ? null : _previousPage,
+          onPressed: _previousPage,
         ),
         title: Row(
           children: List.generate(7, (index) {
@@ -114,23 +77,27 @@ class _QAScreenState extends ConsumerState<QAScreen> {
           }),
         ),
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-          });
-        },
-        children: [
-          _AboutYouStep(onNext: _nextPage),
-          _HealthGoalStep(onNext: _nextPage),
-          _PaceStep(onNext: _nextPage),
-          _ActivityLevelStep(onNext: _nextPage),
-          _MealsStep(onNext: _nextPage),
-          _RestrictionsStep(onNext: _nextPage),
-          _SummaryStep(onNext: _nextPage, isSaving: _isSaving),
-        ],
+      body: profile.map(
+        data: (profile) => PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          onPageChanged: (index) {
+            setState(() {
+              _currentPage = index;
+            });
+          },
+          children: [
+            _AboutYouStep(profile.value, profileNotifier, _nextPage),
+            _HealthGoalStep(profile.value, profileNotifier, _nextPage),
+            _PaceStep(profile.value, profileNotifier, _nextPage),
+            _ActivityLevelStep(profile.value, profileNotifier, _nextPage),
+            _MealsStep(profile.value, profileNotifier, _nextPage),
+            _RestrictionsStep(profile.value, profileNotifier, _nextPage),
+            _SummaryStep(profile.value, profileNotifier, _nextPage),
+          ],
+        ),
+        error: (error) => Text(error.error.toString()),
+        loading: (_) => CircularProgressIndicator(),
       ),
     );
   }
@@ -143,7 +110,7 @@ class _StepContainer extends StatelessWidget {
   final Widget child;
   final VoidCallback onNext;
   final String buttonText;
-  final bool isLoading;
+  final bool finished;
 
   const _StepContainer({
     required this.title,
@@ -151,7 +118,7 @@ class _StepContainer extends StatelessWidget {
     required this.child,
     required this.onNext,
     this.buttonText = 'Continue',
-    this.isLoading = false,
+    required this.finished,
   });
 
   @override
@@ -204,18 +171,8 @@ class _StepContainer extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : onNext,
-                  child: isLoading
-                      ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                      : Text(
+                  onPressed: finished ? onNext : null,
+                  child: Text(
                     buttonText,
                     style: const TextStyle(
                       fontSize: 16,
@@ -233,49 +190,49 @@ class _StepContainer extends StatelessWidget {
 }
 
 // Step 1: About You
-class _AboutYouStep extends ConsumerStatefulWidget {
+class _AboutYouStep extends StatefulWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
 
-  const _AboutYouStep({required this.onNext});
+  const _AboutYouStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
-  ConsumerState<_AboutYouStep> createState() => _AboutYouStepState();
+  State<_AboutYouStep> createState() => _AboutYouStepState();
 }
 
-class _AboutYouStepState extends ConsumerState<_AboutYouStep> {
+class _AboutYouStepState extends State<_AboutYouStep> {
   late TextEditingController _ageController;
   late TextEditingController _weightController;
   late TextEditingController _heightController;
-  String? _selectedGender;
-  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize with empty controllers - we'll populate them in didChangeDependencies
-    _ageController = TextEditingController();
-    _weightController = TextEditingController();
-    _heightController = TextEditingController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Only initialize once
-    if (!_isInitialized) {
-      final profile = ref.read(questionnaireProvider);
-      if (profile.age != null) {
-        _ageController.text = profile.age.toString();
-      }
-      if (profile.weight != null) {
-        _weightController.text = profile.weight.toString();
-      }
-      if (profile.height != null) {
-        _heightController.text = profile.height.toString();
-      }
-      _selectedGender = profile.gender;
-      _isInitialized = true;
-    }
+    _ageController = TextEditingController(
+      text: widget.profile.age?.toString(),
+    );
+    _ageController.addListener(() {
+      widget.profileNotifier.updateData(
+        age: int.tryParse(_ageController.text) ?? 0,
+      );
+    });
+    _weightController = TextEditingController(
+      text: widget.profile.weight?.toString(),
+    );
+    _weightController.addListener(() {
+      widget.profileNotifier.updateData(
+        weight: double.tryParse(_weightController.text) ?? 0,
+      );
+    });
+    _heightController = TextEditingController(
+      text: widget.profile.height?.toString(),
+    );
+    _heightController.addListener(() {
+      widget.profileNotifier.updateData(
+        height: double.tryParse(_heightController.text) ?? 0,
+      );
+    });
   }
 
   @override
@@ -286,56 +243,13 @@ class _AboutYouStepState extends ConsumerState<_AboutYouStep> {
     super.dispose();
   }
 
-  void _saveAndContinue() {
-    // Validate fields
-    if (_selectedGender == null ||
-        _ageController.text.isEmpty ||
-        _weightController.text.isEmpty ||
-        _heightController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please complete all fields'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    final age = double.tryParse(_ageController.text);
-    final weight = double.tryParse(_weightController.text);
-    final height = double.tryParse(_heightController.text);
-
-    if (age == null || weight == null || height == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter valid numbers'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    final notifier = ref.read(questionnaireProvider.notifier);
-    final currentProfile = ref.read(questionnaireProvider);
-
-    notifier.updateData(
-      currentProfile.copyWith(
-        gender: _selectedGender,
-        age: age,
-        weight: weight,
-        height: height,
-      ),
-    );
-
-    widget.onNext();
-  }
-
   @override
   Widget build(BuildContext context) {
     return _StepContainer(
       title: 'Tell us about yourself',
       subtitle: 'This helps us personalize your experience',
-      onNext: _saveAndContinue,
+      onNext: widget.onNext,
+      finished: widget.profile.finishedStep(QAStep.aboutYou),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -349,18 +263,19 @@ class _AboutYouStepState extends ConsumerState<_AboutYouStep> {
           ),
           const SizedBox(height: 12),
           Row(
-            children: ['Male', 'Female', 'Other'].map((gender) {
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _OptionButton(
-                    label: gender,
-                    isSelected: _selectedGender == gender,
-                    onTap: () => setState(() => _selectedGender = gender),
+            spacing: 8,
+            children: Gender.values
+                .map(
+                  (gender) => Expanded(
+                    child: _OptionButton(
+                      label: gender.name,
+                      isSelected: widget.profile.gender == gender,
+                      onTap: () =>
+                          widget.profileNotifier.updateData(gender: gender),
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                )
+                .toList(),
           ),
           const SizedBox(height: 24),
           TextField(
@@ -399,43 +314,31 @@ class _AboutYouStepState extends ConsumerState<_AboutYouStep> {
 }
 
 // Step 2: Health Goal
-class _HealthGoalStep extends ConsumerStatefulWidget {
+class _HealthGoalStep extends StatefulWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
 
-  const _HealthGoalStep({required this.onNext});
+  const _HealthGoalStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
-  ConsumerState<_HealthGoalStep> createState() => _HealthGoalStepState();
+  State<_HealthGoalStep> createState() => _HealthGoalStepState();
 }
 
-class _HealthGoalStepState extends ConsumerState<_HealthGoalStep> {
-  String? _selectedGoal;
+class _HealthGoalStepState extends State<_HealthGoalStep> {
   late TextEditingController _goalWeightController;
-  bool _isInitialized = false;
-  final List<String> _goals = [
-    'Lose Weight',
-    'Stay Fit',
-    'Build Muscle',
-    'Eat Healthier',
-  ];
 
   @override
   void initState() {
     super.initState();
-    _goalWeightController = TextEditingController();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      final profile = ref.read(questionnaireProvider);
-      _selectedGoal = profile.healthGoal;
-      if (profile.goalWeight != null) {
-        _goalWeightController.text = profile.goalWeight.toString();
-      }
-      _isInitialized = true;
-    }
+    _goalWeightController = TextEditingController(
+      text: widget.profile.goalWeight?.toString(),
+    );
+    _goalWeightController.addListener(() {
+      widget.profileNotifier.updateData(
+        goalWeight: double.tryParse(_goalWeightController.text) ?? 0,
+      );
+    });
   }
 
   @override
@@ -444,69 +347,30 @@ class _HealthGoalStepState extends ConsumerState<_HealthGoalStep> {
     super.dispose();
   }
 
-  void _saveAndContinue() {
-    // Validate
-    if (_selectedGoal == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a health goal'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    final notifier = ref.read(questionnaireProvider.notifier);
-    final currentProfile = ref.read(questionnaireProvider);
-
-    double? goalWeight;
-    if (_selectedGoal == 'Lose Weight') {
-      goalWeight = double.tryParse(_goalWeightController.text);
-      if (goalWeight == null && _goalWeightController.text.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a valid goal weight'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-    }
-
-    notifier.updateData(
-      currentProfile.copyWith(
-        healthGoal: _selectedGoal,
-        goalWeight: goalWeight,
-      ),
-    );
-
-    widget.onNext();
-  }
-
   @override
   Widget build(BuildContext context) {
     return _StepContainer(
       title: 'What is your health goal?',
       subtitle: 'Choose your primary objective',
-      onNext: _saveAndContinue,
+      onNext: widget.onNext,
+      finished: widget.profile.finishedStep(QAStep.healthGoal),
       child: Column(
+        spacing: 12,
         children: [
-          ..._goals.map((goal) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _OptionButton(
-                label: goal,
-                isSelected: _selectedGoal == goal,
-                onTap: () => setState(() => _selectedGoal = goal),
-              ),
-            );
-          }),
-          if (_selectedGoal == 'Lose Weight') ...[
+          ...HealthGoal.values.map(
+            (goal) => _OptionButton(
+              label: goal.name,
+              isSelected: widget.profile.healthGoal == goal,
+              onTap: () => widget.profileNotifier.updateData(healthGoal: goal),
+            ),
+          ),
+          if (widget.profile.healthGoal == HealthGoal.loseWeight) ...[
             const SizedBox(height: 24),
             TextField(
               controller: _goalWeightController,
-              keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Goal Weight (kg)',
                 hintText: 'What weight do you want to reach?',
@@ -522,240 +386,117 @@ class _HealthGoalStepState extends ConsumerState<_HealthGoalStep> {
 }
 
 // Step 3: Pace
-class _PaceStep extends ConsumerStatefulWidget {
+class _PaceStep extends StatelessWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
 
-  const _PaceStep({required this.onNext});
-
-  @override
-  ConsumerState<_PaceStep> createState() => _PaceStepState();
-}
-
-class _PaceStepState extends ConsumerState<_PaceStep> {
-  String? _selectedPace;
-  bool _isInitialized = false;
-  final Map<String, String> _paces = {
-    'Steady & Sustainable': 'Gradual progress, long-term habits',
-    'Balanced': 'Moderate pace with flexibility',
-    'Intensive': 'Fast results, strict plan',
-  };
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      _selectedPace = ref.read(questionnaireProvider).pace;
-      _isInitialized = true;
-    }
-  }
-
-  void _saveAndContinue() {
-    if (_selectedPace == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a pace'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    final notifier = ref.read(questionnaireProvider.notifier);
-    final currentProfile = ref.read(questionnaireProvider);
-
-    notifier.updateData(
-      currentProfile.copyWith(pace: _selectedPace),
-    );
-
-    widget.onNext();
-  }
+  const _PaceStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
   Widget build(BuildContext context) {
     return _StepContainer(
       title: 'How fast do you want to get there?',
       subtitle: 'Choose your preferred pace',
-      onNext: _saveAndContinue,
+      onNext: onNext,
+      finished: profile.finishedStep(QAStep.pace),
       child: Column(
-        children: _paces.entries.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _OptionButtonWithSubtitle(
-              label: entry.key,
-              subtitle: entry.value,
-              isSelected: _selectedPace == entry.key,
-              onTap: () => setState(() => _selectedPace = entry.key),
-            ),
-          );
-        }).toList(),
+        spacing: 12,
+        children: Pace.values
+            .map(
+              (pace) => _OptionButtonWithSubtitle(
+                label: pace.name,
+                subtitle: pace.description,
+                isSelected: profile.pace == pace,
+                onTap: () => profileNotifier.updateData(pace: pace),
+              ),
+            )
+            .toList(),
       ),
     );
   }
 }
 
 // Step 4: Activity Level
-class _ActivityLevelStep extends ConsumerStatefulWidget {
+class _ActivityLevelStep extends StatelessWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
 
-  const _ActivityLevelStep({required this.onNext});
-
-  @override
-  ConsumerState<_ActivityLevelStep> createState() =>
-      _ActivityLevelStepState();
-}
-
-class _ActivityLevelStepState extends ConsumerState<_ActivityLevelStep> {
-  String? _selectedActivityLevel;
-  bool _isInitialized = false;
-  final Map<String, String> _activityLevels = {
-    'Sedentary': 'Little or no exercise',
-    'Lightly Active': 'Light exercise, 1-3 days/week',
-    'Moderately Active': 'Moderate exercise, 3-5 days/week',
-    'Very Active': 'Hard exercise, 6-7 days/week',
-    'Extra Active': 'Very hard exercise & physical job',
-  };
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      _selectedActivityLevel = ref.read(questionnaireProvider).activityLevel;
-      _isInitialized = true;
-    }
-  }
-
-  void _saveAndContinue() {
-    if (_selectedActivityLevel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an activity level'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    final notifier = ref.read(questionnaireProvider.notifier);
-    final currentProfile = ref.read(questionnaireProvider);
-
-    notifier.updateData(
-      currentProfile.copyWith(activityLevel: _selectedActivityLevel),
-    );
-
-    widget.onNext();
-  }
+  const _ActivityLevelStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
   Widget build(BuildContext context) {
     return _StepContainer(
       title: 'What is your activity level?',
       subtitle: 'Pick your usual activity',
-      onNext: _saveAndContinue,
+      onNext: onNext,
+      finished: profile.finishedStep(QAStep.activityLevel),
       child: Column(
-        children: _activityLevels.entries.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _OptionButtonWithSubtitle(
-              label: entry.key,
-              subtitle: entry.value,
-              isSelected: _selectedActivityLevel == entry.key,
-              onTap: () => setState(() => _selectedActivityLevel = entry.key),
-            ),
-          );
-        }).toList(),
+        spacing: 12,
+        children: ActivityLevel.values
+            .map(
+              (level) => _OptionButtonWithSubtitle(
+                label: level.name,
+                subtitle: level.description,
+                isSelected: profile.activityLevel == level,
+                onTap: () => profileNotifier.updateData(activityLevel: level),
+              ),
+            )
+            .toList(),
       ),
     );
   }
 }
 
 // Step 5: Meals
-class _MealsStep extends ConsumerStatefulWidget {
+class _MealsStep extends StatelessWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
 
-  const _MealsStep({required this.onNext});
-
-  @override
-  ConsumerState<_MealsStep> createState() => _MealsStepState();
-}
-
-class _MealsStepState extends ConsumerState<_MealsStep> {
-  late Map<String, bool> _meals;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _meals = {
-      'Breakfast': true,
-      'Brunch': false,
-      'Lunch': true,
-      'Afternoon Snack': false,
-      'Dinner': true,
-      'Midnight Snack': false,
-    };
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      final profile = ref.read(questionnaireProvider);
-      if (profile.meals.isNotEmpty) {
-        for (var entry in profile.meals.entries) {
-          if (_meals.containsKey(entry.key)) {
-            _meals[entry.key] = entry.value;
-          }
-        }
-      }
-      _isInitialized = true;
-    }
-  }
-
-  void _saveAndContinue() {
-    final notifier = ref.read(questionnaireProvider.notifier);
-    final currentProfile = ref.read(questionnaireProvider);
-
-    notifier.updateData(
-      currentProfile.copyWith(meals: Map<String, bool>.from(_meals)),
-    );
-
-    widget.onNext();
-  }
+  const _MealsStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
   Widget build(BuildContext context) {
     return _StepContainer(
       title: 'Which meals do you include?',
       subtitle: 'Select all that apply',
-      onNext: _saveAndContinue,
+      onNext: onNext,
+      finished: profile.finishedStep(QAStep.meals),
       child: Column(
-        children: _meals.keys.map((meal) {
+        spacing: 8,
+        children: Meal.values.map((meal) {
+          final selected = profile.meals.contains(meal);
+
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _meals[meal]!
+                color: selected
                     ? Theme.of(context).colorScheme.primary
                     : Colors.grey[300]!,
-                width: _meals[meal]! ? 2 : 1,
+                width: selected ? 2 : 1,
               ),
             ),
             child: CheckboxListTile(
               title: Text(
-                meal,
+                meal.name,
                 style: TextStyle(
-                  fontWeight:
-                  _meals[meal]! ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                   color: Colors.black87,
                 ),
               ),
-              value: _meals[meal],
+              value: selected,
               onChanged: (value) {
-                setState(() {
-                  _meals[meal] = value!;
-                });
+                if (value == true) {
+                  profile.meals.add(meal);
+                } else {
+                  profile.meals.remove(meal);
+                }
+                profileNotifier.updateData(meals: profile.meals);
               },
               controlAffinity: ListTileControlAffinity.trailing,
             ),
@@ -767,99 +508,52 @@ class _MealsStepState extends ConsumerState<_MealsStep> {
 }
 
 // Step 6: Restrictions
-class _RestrictionsStep extends ConsumerStatefulWidget {
+class _RestrictionsStep extends StatelessWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
 
-  const _RestrictionsStep({required this.onNext});
-
-  @override
-  ConsumerState<_RestrictionsStep> createState() => _RestrictionsStepState();
-}
-
-class _RestrictionsStepState extends ConsumerState<_RestrictionsStep> {
-  late Map<String, bool> _restrictions;
-  bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _restrictions = {
-      'Gluten-free': false,
-      'Dairy-free': false,
-      'Nut-free': false,
-      'Shellfish-free': false,
-      'Vegetarian': false,
-      'Vegan': false,
-      'Pescatarian': false,
-      'No Pork': false,
-      'No Alcohol': false,
-    };
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      final profile = ref.read(questionnaireProvider);
-      if (profile.restrictions.isNotEmpty) {
-        for (var entry in profile.restrictions.entries) {
-          if (_restrictions.containsKey(entry.key)) {
-            _restrictions[entry.key] = entry.value;
-          }
-        }
-      }
-      _isInitialized = true;
-    }
-  }
-
-  void _saveAndContinue() {
-    final notifier = ref.read(questionnaireProvider.notifier);
-    final currentProfile = ref.read(questionnaireProvider);
-
-    notifier.updateData(
-      currentProfile.copyWith(
-        restrictions: Map<String, bool>.from(_restrictions),
-      ),
-    );
-
-    widget.onNext();
-  }
+  const _RestrictionsStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
   Widget build(BuildContext context) {
     return _StepContainer(
       title: 'Any dietary restrictions?',
       subtitle: 'Select all that apply',
-      onNext: _saveAndContinue,
+      onNext: onNext,
+      finished: profile.finishedStep(QAStep.restrictions),
       child: Column(
-        children: _restrictions.keys.map((restriction) {
+        spacing: 8,
+        children: Restriction.values.map((restriction) {
+          final selected = profile.restrictions.contains(restriction);
+
           return Container(
-            margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _restrictions[restriction]!
+                color: selected
                     ? Theme.of(context).colorScheme.primary
                     : Colors.grey[300]!,
-                width: _restrictions[restriction]! ? 2 : 1,
+                width: selected ? 2 : 1,
               ),
             ),
             child: CheckboxListTile(
               title: Text(
-                restriction,
+                restriction.name,
                 style: TextStyle(
-                  fontWeight: _restrictions[restriction]!
-                      ? FontWeight.w600
-                      : FontWeight.normal,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                   color: Colors.black87,
                 ),
               ),
-              value: _restrictions[restriction],
+              value: selected,
               onChanged: (value) {
-                setState(() {
-                  _restrictions[restriction] = value!;
-                });
+                if (value == true) {
+                  profile.restrictions.add(restriction);
+                } else {
+                  profile.restrictions.remove(restriction);
+                }
+                profileNotifier.updateData(restrictions: profile.restrictions);
               },
               controlAffinity: ListTileControlAffinity.trailing,
             ),
@@ -871,60 +565,25 @@ class _RestrictionsStepState extends ConsumerState<_RestrictionsStep> {
 }
 
 // Step 7: Summary with TMB/TDEE
-class _SummaryStep extends ConsumerWidget {
+class _SummaryStep extends StatelessWidget {
+  final UserProfile profile;
+  final UserProfileNotifier profileNotifier;
   final VoidCallback onNext;
-  final bool isSaving;
 
-  const _SummaryStep({
-    required this.onNext,
-    required this.isSaving,
-  });
+  const _SummaryStep(this.profile, this.profileNotifier, this.onNext);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final profile = ref.watch(questionnaireProvider);
-    final notifier = ref.read(questionnaireProvider.notifier);
-
-    final tmb = notifier.calculateTMB();
-    final tdee = notifier.calculateTDEE();
-    final recommendedCalories = notifier.calculateRecommendedCalories();
-    final weeksToGoal = notifier.calculateWeeksToGoal();
 
     return _StepContainer(
       title: 'Your Personalized Plan',
       subtitle: 'Based on your information',
       onNext: onNext,
       buttonText: 'Get Started',
-      isLoading: isSaving,
+      finished: profile.finishedStep(QAStep.summary),
       child: Column(
         children: [
-          if (tmb == null || tdee == null) ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Missing data: ${profile.gender == null ? "Gender " : ""}${profile.age == null ? "Age " : ""}${profile.weight == null ? "Weight " : ""}${profile.height == null ? "Height " : ""}${profile.activityLevel == null ? "Activity Level" : ""}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.orange.shade900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
           // TMB/TDEE Card
           Container(
             padding: const EdgeInsets.all(20),
@@ -967,7 +626,9 @@ class _SummaryStep extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            tmb != null ? '${tmb.round()} kcal' : '-- kcal',
+                            profile.bmr != null
+                                ? '${profile.bmr!.round()} kcal'
+                                : '-- kcal',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -999,7 +660,9 @@ class _SummaryStep extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            tdee != null ? '${tdee.round()} kcal' : '-- kcal',
+                            profile.tdee != null
+                                ? '${profile.tdee!.round()} kcal'
+                                : '-- kcal',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -1011,46 +674,46 @@ class _SummaryStep extends ConsumerWidget {
                     ),
                   ],
                 ),
-                if (recommendedCalories != null) ...[
-                  const SizedBox(height: 16),
-                  Divider(color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  // Recommended Calories
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Recommended Intake',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
+                const SizedBox(height: 16),
+                Divider(color: Colors.grey[300]),
+                const SizedBox(height: 16),
+                // Recommended Calories
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recommended Intake',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${recommendedCalories.round()} kcal',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            profile.recommendedCalories != null
+                                ? '${profile.recommendedCalories!.round()} kcal'
+                                : '-- kcal',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           const SizedBox(height: 24),
           // Goal summary
-          if (profile.healthGoal == 'Lose Weight' &&
+          if (profile.healthGoal == HealthGoal.loseWeight &&
               profile.goalWeight != null) ...[
             Container(
               padding: const EdgeInsets.all(16),
@@ -1080,10 +743,10 @@ class _SummaryStep extends ConsumerWidget {
                             color: Colors.black87,
                           ),
                         ),
-                        if (weeksToGoal != null) ...[
+                        if (profile.weeksToGoal != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Est. ${weeksToGoal.round()} weeks',
+                            'Est. ${profile.weeksToGoal!.round()} weeks',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
