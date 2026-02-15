@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'pantry.freezed.dart';
+part 'ingredient.freezed.dart';
+part 'ingredient.g.dart';
 
 enum Unit {
   gram('g'),
@@ -12,10 +13,12 @@ enum Unit {
 }
 
 @freezed
-abstract class InventoryItem with _$InventoryItem {
-  const factory InventoryItem({
+abstract class Ingredient with _$Ingredient {
+  const factory Ingredient({
     required String name,
     required int quantity,
     required Unit unit,
-  }) = _PantryItem;
+  }) = _Ingredient;
+
+  factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
 }

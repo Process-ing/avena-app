@@ -1,4 +1,4 @@
-import 'package:avena/model/inventory.dart';
+import 'package:avena/model/ingredient.dart';
 import 'package:avena/model/week.dart';
 import 'package:avena/provider/inventory.dart';
 import 'package:flutter/material.dart';
@@ -16,126 +16,6 @@ class _PantryScreenState extends State<PantryScreen>
   late TabController _tabController;
   WeekDay selectedDay = WeekDay.monday;
 
-  // Sample recipes for different days
-  final Map<WeekDay, List<Map<String, dynamic>>> recipesByDay = {
-    WeekDay.monday: [
-      {
-        'title': 'Raspberry almond butter\nbowl',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=400',
-        'ingredients': [
-          {'text': '1 cup frozen raspberries', 'purchased': false},
-          {'text': '1 frozen banana', 'purchased': false},
-          {'text': '1 tablespoon almond butter', 'purchased': true},
-          {
-            'text': '1 cup silk dairy-free almondmilk yogurt',
-            'purchased': false,
-          },
-        ],
-      },
-      {
-        'title': 'Ricotta heirloom tomato\ntart',
-        'subtitle': '(lunch)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
-        'ingredients': [
-          {'text': '38g finely ground cornmeal', 'purchased': false},
-          {'text': '75g blanched almond flour', 'purchased': false},
-          {'text': '1 teaspoon kosher salt', 'purchased': true},
-        ],
-      },
-    ],
-    WeekDay.tuesday: [
-      {
-        'title': 'Avocado toast with\npoached egg',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400',
-        'ingredients': [
-          {'text': '2 slices whole grain bread', 'purchased': false},
-          {'text': '1 ripe avocado', 'purchased': false},
-          {'text': '2 eggs', 'purchased': true},
-          {'text': '1 tablespoon white vinegar', 'purchased': false},
-          {'text': 'Salt and pepper to taste', 'purchased': false},
-        ],
-      },
-    ],
-    WeekDay.wednesday: [
-      {
-        'title': 'Greek yogurt parfait',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
-        'ingredients': [
-          {'text': '2 cups Greek yogurt', 'purchased': false},
-          {'text': '1 cup granola', 'purchased': false},
-          {'text': '1 cup mixed berries', 'purchased': true},
-          {'text': '2 tablespoons honey', 'purchased': false},
-        ],
-      },
-    ],
-    WeekDay.thursday: [
-      {
-        'title': 'Smoothie bowl',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400',
-        'ingredients': [
-          {'text': '2 frozen bananas', 'purchased': false},
-          {'text': '1 cup spinach', 'purchased': false},
-          {'text': '0.5 cup almond milk', 'purchased': true},
-          {'text': '1 tablespoon chia seeds', 'purchased': false},
-        ],
-      },
-    ],
-    WeekDay.friday: [
-      {
-        'title': 'Pancakes with maple syrup',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400',
-        'ingredients': [
-          {'text': '2 cups all-purpose flour', 'purchased': false},
-          {'text': '2 tablespoons sugar', 'purchased': true},
-          {'text': '2 teaspoons baking powder', 'purchased': false},
-          {'text': '2 eggs', 'purchased': false},
-          {'text': '1.5 cups milk', 'purchased': false},
-        ],
-      },
-    ],
-    WeekDay.saturday: [
-      {
-        'title': 'Eggs benedict',
-        'subtitle': '(brunch)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1608039829572-78524f79ca0c?w=400',
-        'ingredients': [
-          {'text': '4 eggs', 'purchased': false},
-          {'text': '2 English muffins', 'purchased': false},
-          {'text': '4 slices Canadian bacon', 'purchased': true},
-          {'text': '3 egg yolks', 'purchased': false},
-          {'text': '0.5 cup butter', 'purchased': false},
-        ],
-      },
-    ],
-    WeekDay.sunday: [
-      {
-        'title': 'French toast',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400',
-        'ingredients': [
-          {'text': '4 slices bread', 'purchased': false},
-          {'text': '3 eggs', 'purchased': false},
-          {'text': '0.5 cup milk', 'purchased': true},
-          {'text': '1 teaspoon vanilla extract', 'purchased': false},
-          {'text': '1 teaspoon cinnamon', 'purchased': false},
-        ],
-      },
-    ],
-  };
-
   @override
   void initState() {
     super.initState();
@@ -150,7 +30,7 @@ class _PantryScreenState extends State<PantryScreen>
 
   void _removeRecipe(WeekDay day, int index) {
     setState(() {
-      recipesByDay[day]?.removeAt(index);
+      // recipesByDay[day]?.removeAt(index);
     });
   }
 
@@ -249,7 +129,7 @@ class _PantryScreenState extends State<PantryScreen>
   }
 
   Widget _buildShoppingList() {
-    final currentRecipes = recipesByDay[selectedDay] ?? [];
+    final currentRecipes = /* recipesByDay[selectedDay] ?? */ [];
 
     return Column(
       children: [
@@ -722,7 +602,7 @@ class Inventory extends ConsumerWidget {
 
   void _deleteInventoryItem(
     BuildContext context,
-    InventoryItem item,
+    Ingredient item,
     VoidCallback onDelete,
   ) {
     showDialog(
@@ -749,7 +629,7 @@ class Inventory extends ConsumerWidget {
 
   void _addInventoryItem(
     BuildContext context,
-    void Function(InventoryItem) onAdd,
+    void Function(Ingredient) onAdd,
   ) {
     final nameController = TextEditingController();
     final quantityController = TextEditingController(text: '1');
@@ -824,7 +704,7 @@ class Inventory extends ConsumerWidget {
                 if (nameController.text.isNotEmpty) {
                   Navigator.pop(context);
                   onAdd(
-                    InventoryItem(
+                    Ingredient(
                       name: nameController.text,
                       quantity: int.tryParse(quantityController.text) ?? 1,
                       unit: selectedUnit,
@@ -842,7 +722,7 @@ class Inventory extends ConsumerWidget {
 }
 
 class InventoryItemCard extends StatelessWidget {
-  final InventoryItem item;
+  final Ingredient item;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onDelete;
