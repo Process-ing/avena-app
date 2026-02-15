@@ -3,6 +3,7 @@ import 'package:avena/screen/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/profile_provider.dart';
+import 'package:avena/screen/main_shell.dart';
 
 class QAScreen extends ConsumerStatefulWidget {
   const QAScreen({super.key});
@@ -14,18 +15,19 @@ class QAScreen extends ConsumerStatefulWidget {
 class _QAScreenState extends ConsumerState<QAScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  static const _pageCount = 7;
 
   void _nextPage() {
-    if (_currentPage < 6) {
+    if (_currentPage < _pageCount - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      // Finish questionnaire and save to backend
-      Navigator.of(
+      Navigator.pushReplacement(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+        MaterialPageRoute(builder: (_) => const MainShell()),
+      );
     }
   }
 
@@ -61,14 +63,14 @@ class _QAScreenState extends ConsumerState<QAScreen> {
           onPressed: _previousPage,
         ),
         title: Row(
-          children: List.generate(7, (index) {
+          children: List.generate(_pageCount, (index) {
             return Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 height: 4,
                 decoration: BoxDecoration(
                   color: index <= _currentPage
-                      ? Theme.of(context).colorScheme.primary
+                      ? Colors.amber[700]
                       : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -103,7 +105,6 @@ class _QAScreenState extends ConsumerState<QAScreen> {
   }
 }
 
-// Base Step Widget
 class _StepContainer extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -172,6 +173,14 @@ class _StepContainer extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: finished ? onNext : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber[700],
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
                   child: Text(
                     buttonText,
                     style: const TextStyle(
@@ -499,6 +508,7 @@ class _MealsStep extends StatelessWidget {
                 profileNotifier.updateData(meals: profile.meals);
               },
               controlAffinity: ListTileControlAffinity.trailing,
+              activeColor: Colors.amber[700],
             ),
           );
         }).toList(),
@@ -556,6 +566,7 @@ class _RestrictionsStep extends StatelessWidget {
                 profileNotifier.updateData(restrictions: profile.restrictions);
               },
               controlAffinity: ListTileControlAffinity.trailing,
+              activeColor: Colors.amber[700],
             ),
           );
         }).toList(),
@@ -574,8 +585,6 @@ class _SummaryStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return _StepContainer(
       title: 'Your Personalized Plan',
       subtitle: 'Based on your information',
@@ -590,14 +599,14 @@ class _SummaryStep extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: theme.colorScheme.primary, width: 2),
+              border: Border.all(color: Colors.amber[700]!, width: 2),
             ),
             child: Column(
               children: [
                 Icon(
                   Icons.local_fire_department,
                   size: 48,
-                  color: theme.colorScheme.primary,
+                  color: Colors.amber[700],
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -724,7 +733,7 @@ class _SummaryStep extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.flag, color: theme.colorScheme.primary),
+                  Icon(Icons.flag, color: Colors.amber[700]),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -761,7 +770,7 @@ class _SummaryStep extends StatelessWidget {
                       '${(profile.weight! - profile.goalWeight!).abs().toStringAsFixed(1)} kg to go',
                       style: TextStyle(
                         fontSize: 14,
-                        color: theme.colorScheme.primary,
+                        color: Colors.amber[700],
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -774,21 +783,17 @@ class _SummaryStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.05),
+              color: Colors.amber[700]!.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.info_outline, size: 20, color: Colors.amber[700]),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Your BMR is the calories you burn at rest. TDEE includes your activity level. We\'ll use this to create your personalized meal plan.',
+                    "Your BMR is the calories you burn at rest. TDEE includes your activity level. We'll use this to create your personalized meal plan.",
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[700],
@@ -805,22 +810,17 @@ class _SummaryStep extends StatelessWidget {
   }
 }
 
-// Option Button Widget
 class _OptionButton extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-
   const _OptionButton({
     required this.label,
     required this.isSelected,
     required this.onTap,
   });
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -828,10 +828,10 @@ class _OptionButton extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.primary : Colors.white,
+          color: isSelected ? Colors.amber[700] : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : Colors.grey[300]!,
+            color: isSelected ? Colors.amber[700]! : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -849,13 +849,11 @@ class _OptionButton extends StatelessWidget {
   }
 }
 
-// Option Button with Subtitle
 class _OptionButtonWithSubtitle extends StatelessWidget {
   final String label;
   final String subtitle;
   final bool isSelected;
   final VoidCallback onTap;
-
   const _OptionButtonWithSubtitle({
     required this.label,
     required this.subtitle,
@@ -865,8 +863,6 @@ class _OptionButtonWithSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -874,10 +870,10 @@ class _OptionButtonWithSubtitle extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.primary : Colors.white,
+          color: isSelected ? Colors.amber[700] : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : Colors.grey[300]!,
+            color: isSelected ? Colors.amber[700]! : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
         ),

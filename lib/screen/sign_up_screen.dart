@@ -104,28 +104,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.amber.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  child: Image.asset(
-                    'assets/logo.png',
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(Icons.eco, size: 50, color: Colors.amber[700]),
-                  ),
-                ),
+                Image.asset('logo.png'),
                 const SizedBox(height: 24),
 
                 // Title

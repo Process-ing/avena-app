@@ -47,6 +47,7 @@ app.*.map.json
 .direnv
 
 *.g.dart
+*.freezed.dart
 /ios/Podfile
 /macos/Podfile
 /macos/Podfile.lock

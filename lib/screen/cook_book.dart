@@ -1,106 +1,192 @@
+import 'package:avena/model/recipe.dart';
+import 'package:avena/provider/category.dart';
+import 'package:avena/provider/cook_book.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CookBookScreen extends StatelessWidget {
-  const CookBookScreen({super.key});
+class CookBookScreen extends ConsumerWidget {
+  const CookBookScreen({super.key, required void Function() onProfilePressed});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categories = ref.watch(categoriesProvider);
+
+    final category = ref.watch(cookBookCategoryProvider);
+    final categoryNotifier = ref.watch(cookBookCategoryProvider.notifier);
+
+    final pantry = ref.watch(cookBookPantryProvider);
+    final pantryNotifier = ref.watch(cookBookPantryProvider.notifier);
+
+    final recipes = ref.watch(cookBookRecipesProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircleAvatar(
+            backgroundColor: Colors.grey[300],
+            child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+          ),
+        ),
+        title: const Text(
+          'Cook Book',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    // Spacer to push chips to the right
+                    const Spacer(),
+                    // Category chips
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final current = categories[index];
+                          final isSelected = current == category;
+
+                          return GestureDetector(
+                            onTap: () => categoryNotifier.toggle(current),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.black : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.black
+                                      : Colors.grey[300]!,
+                                ),
+                              ),
+                              child: Text(
+                                current,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.black87,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemCount: categories.length,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const SizedBox(
+                      height: 40,
+                      child: VerticalDivider(width: 1),
+                    ),
+                    const SizedBox(width: 8),
+                    // Pantry chip
+                    GestureDetector(
+                      onTap: () => pantryNotifier.toggle(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: pantry ? Colors.black : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: pantry ? Colors.black : Colors.grey[300]!,
+                          ),
+                        ),
+                        child: Text(
+                          'Pantry',
+                          style: TextStyle(
+                            color: pantry ? Colors.white : Colors.black87,
+                            fontWeight: pantry
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                ),
+              ),
+              // Divider line
+              Container(height: 1, color: Colors.grey[300]),
+            ],
+          ),
+        ),
+      ),
+      body: recipes.map(
+        data: (recipes) => CookBookRecipeList(recipes.value),
+        error: (error) => const Center(child: Text('Error loading recipes')),
+        loading: (_) => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+}
+
+class CookBookRecipeList extends StatelessWidget {
+  final List<Recipe> recipes;
+
+  const CookBookRecipeList(this.recipes, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cook Book'),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(40),
-          child: Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 40,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    children: [
-                      ChoiceChip(
-                        label: Text('Breakfast'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                      SizedBox(width: 4),
-                      ChoiceChip(
-                        label: Text('Second Breakfast'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                      SizedBox(width: 4),
-                      ChoiceChip(
-                        label: Text('Morning Snack'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                      SizedBox(width: 4),
-                      ChoiceChip(
-                        label: Text('Lunch'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                      SizedBox(width: 4),
-                      ChoiceChip(
-                        label: Text('Afternoon Snack'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                      SizedBox(width: 4),
-                      ChoiceChip(
-                        label: Text('Dinner'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                      SizedBox(width: 4),
-                      ChoiceChip(
-                        label: Text('Supper'),
-                        selected: false,
-                        onSelected: (v) => {},
-                      ),
-                    ],
-                  ),
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemBuilder: (context, index) => Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: Image.network(
+                "https://picsum.photos/800/450",
+                fit: BoxFit.cover,
+              ),
+            ),
+            Container(color: Colors.black.withValues(alpha: 0.3)),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                recipes[index].name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 40, child: VerticalDivider(width: 1)),
-              SizedBox(width: 4),
-              ChoiceChip(
-                label: Text('Pantry'),
-                selected: true,
-                onSelected: (v) => {},
-              ),
-              SizedBox(width: 8),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-      body: ListView.builder(
-        itemBuilder: (context, index) => Card(
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            alignment: AlignmentGeometry.center,
-            children: [
-              Positioned.fill(
-                child: Image.network(
-                  "https://picsum.photos/800/450",
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsetsGeometry.all(32),
-                child: Text(
-                  'Recipe title very nice',
-                  style: Theme.of(context).primaryTextTheme.displayLarge,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-        itemCount: 1000,
-      ),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemCount: recipes.length,
     );
   }
 }

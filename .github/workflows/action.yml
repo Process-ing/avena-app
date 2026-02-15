@@ -22,7 +22,7 @@ jobs:
 
       - run: flutter pub get
       - run: flutter pub run build_runner build
-      - run: dart format $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.mocks.dart" -a -not -path "./.dart_tool/*") --set-exit-if-changed
+      - run: dart format $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.freezed.dart" -a -not -name "*.mocks.dart" -a -not -path "./.dart_tool/*") --set-exit-if-changed
 
   lint:
     name: Lint
@@ -44,7 +44,7 @@ jobs:
 
       - run: flutter pub get
       - run: flutter pub run build_runner build
-      - run: flutter analyze $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.mocks.dart" -a -not -path "./.dart_tool/*")
+      - run: flutter analyze $(find . -type f -name "*.dart" -a -not -name "*.g.dart" -a -not -name "*.freezed.dart" -a -not -name "*.mocks.dart" -a -not -path "./.dart_tool/*")
 
   test:
     name: Test
