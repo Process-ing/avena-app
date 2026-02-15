@@ -2,6 +2,7 @@ import 'package:avena/mutation/auth.dart';
 import 'package:avena/provider/auth.dart';
 import 'package:avena/provider/profile.dart';
 import 'package:avena/provider/weight_diary.dart';
+import 'package:avena/screen/login.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,9 +133,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _signOut() async {
-    await signOut(ref);
-    if (mounted) {
-      Navigator.popUntil(context, (route) => route.isFirst);
+    try {
+      await signOut(ref);
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sign out failed: ${e.toString()}')),
+        );
+      }
     }
   }
 
