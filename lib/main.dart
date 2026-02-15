@@ -1,9 +1,9 @@
 import 'package:avena/model/initial.dart';
 import 'package:avena/provider/initial.dart';
 import 'package:avena/screen/main_shell.dart';
-import 'package:avena/screen/qa_screen.dart';
+import 'package:avena/screen/qa.dart';
 import 'package:flutter/material.dart';
-import 'package:avena/screen/login_screen.dart';
+import 'package:avena/screen/login.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {

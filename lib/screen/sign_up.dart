@@ -1,60 +1,101 @@
 import 'package:avena/mutation/auth.dart';
-import 'package:avena/screen/main_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:avena/screen/sign_up_screen.dart';
+import 'package:avena/screen/qa.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends ConsumerStatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _SignUpScreenState extends ConsumerState<SignUpScreen> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _onLogin() async {
+  Future<void> _onSignUp() async {
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
+    // Validações
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, preencha todos os campos')),
       );
       return;
     }
 
-    await signIn(ref, email: email, password: password);
+    if (!email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, insira um email válido')),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('A password deve ter pelo menos 6 caracteres'),
+        ),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
+
+    await signUp(ref, name: name, email: email, password: password);
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(signInMutation, (_, state) {
+    ref.listen(signUpMutation, (_, state) {
       if (state.hasError) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Could not sign in')));
+        ).showSnackBar(const SnackBar(content: Text('Could not sign up')));
       } else if (state.isSuccess) {
         Navigator.of(
           context,
-        ).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()));
+        ).pushReplacement(new MaterialPageRoute(builder: (_) => QAScreen()));
       }
     });
 
-    final signInState = ref.watch(signInMutation);
+    final signUpState = ref.watch(signUpMutation);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F3),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.amber[700]),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -63,27 +104,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset('assets/logo.png'),
-                const SizedBox(height: 32),
+                Image.asset('logo.png'),
+                const SizedBox(height: 24),
 
-                // App Name
+                // Title
                 const Text(
-                  'Avena',
+                  'Create Account',
                   style: TextStyle(
-                    fontSize: 36,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2C2C2C),
-                    letterSpacing: 1.2,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Welcome back',
+                  'Sign up to get started',
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 32),
 
-                // Login Card
+                // Sign Up Card
                 Container(
                   constraints: const BoxConstraints(maxWidth: 400),
                   padding: const EdgeInsets.all(24),
@@ -101,11 +141,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Name Field
+                      TextField(
+                        controller: _nameController,
+                        enabled: !signUpState.isPending,
+                        decoration: InputDecoration(
+                          labelText: 'Full Name',
+                          hintText: 'Enter your name',
+                          prefixIcon: Icon(
+                            Icons.person_outline,
+                            color: Colors.amber[700],
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.amber[700]!,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
                       // Email Field
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !signInState.isPending,
+                        enabled: !signUpState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'Enter your email',
@@ -136,10 +206,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        enabled: !signInState.isPending,
+                        enabled: !signUpState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          hintText: 'Enter your password',
+                          hintText: 'Create a password',
                           prefixIcon: Icon(
                             Icons.lock_outline,
                             color: Colors.amber[700],
@@ -174,13 +244,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
 
-                      // Login Button
+                      // Confirm Password Field
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        enabled: !signUpState.isPending,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          hintText: 'Re-enter your password',
+                          prefixIcon: Icon(
+                            Icons.lock_outline,
+                            color: Colors.amber[700],
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.amber[700],
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.amber[700]!,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Sign Up Button
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: signInState.isPending ? null : _onLogin,
+                          onPressed: signUpState.isPending ? null : _onSignUp,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[700],
                             foregroundColor: Colors.white,
@@ -189,7 +304,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: signInState.isPending
+                          child: signUpState.isPending
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
@@ -199,7 +314,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Login',
+                                  'Sign Up',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -212,25 +327,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // Sign Up Link
+                // Login Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      'Already have an account? ',
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignUpScreen(),
-                          ),
-                        );
-                      },
+                      onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'Sign up',
+                        'Log in',
                         style: TextStyle(
                           color: Colors.amber[700],
                           fontSize: 14,

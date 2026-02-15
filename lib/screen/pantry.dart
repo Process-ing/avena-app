@@ -633,7 +633,7 @@ class Inventory extends ConsumerWidget {
   ) {
     final nameController = TextEditingController();
     final quantityController = TextEditingController(text: '1');
-    Unit selectedUnit = Unit.gram;
+    Unit selectedUnit = Unit.values[0];
 
     showDialog(
       context: context,
@@ -706,7 +706,7 @@ class Inventory extends ConsumerWidget {
                   onAdd(
                     Ingredient(
                       name: nameController.text,
-                      quantity: int.tryParse(quantityController.text) ?? 1,
+                      quantity: double.tryParse(quantityController.text) ?? 1,
                       unit: selectedUnit,
                     ),
                   );

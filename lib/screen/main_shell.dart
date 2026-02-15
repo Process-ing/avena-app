@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:avena/screen/home.dart';
 import 'package:avena/screen/cook_book.dart';
-import 'package:avena/screen/pantry_screen.dart';
+import 'package:avena/screen/pantry.dart';
 import 'package:avena/screen/profile.dart';
 
 class MainShell extends StatefulWidget {

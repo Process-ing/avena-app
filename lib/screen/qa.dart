@@ -1,5 +1,5 @@
 import 'package:avena/model/user_profile_model.dart';
-import 'package:avena/provider/profile_provider.dart';
+import 'package:avena/provider/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:avena/screen/main_shell.dart';

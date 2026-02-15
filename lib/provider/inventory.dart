@@ -35,9 +35,9 @@ class InventoryNotifier extends _$InventoryNotifier {
     ref.notifyListeners();
   }
 
-  void incrementItemQuantity(int index, int quantity) {
+  void incrementItemQuantity(int index, double quantity) {
     final api = ref.watch(backendApiProvider);
-    final newQuantity = max(0, state.value![index].quantity + quantity);
+    final newQuantity = max(0.0, state.value![index].quantity + quantity);
 
     state.value![index] = state.value![index].copyWith(quantity: newQuantity);
     ref.notifyListeners();

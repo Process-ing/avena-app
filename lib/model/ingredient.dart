@@ -5,8 +5,9 @@ part 'ingredient.g.dart';
 
 @JsonEnum(valueField: "name")
 enum Unit {
-  gram('g'),
-  milliliter('ml'),
+  kilogram('kg'),
+  liter('l'),
+  @JsonValue(null)
   parcel('pcs');
 
   const Unit(this.name);
@@ -17,7 +18,7 @@ enum Unit {
 abstract class Ingredient with _$Ingredient {
   const factory Ingredient({
     required String name,
-    required int quantity,
+    required double quantity,
     required Unit unit,
   }) = _Ingredient;
 

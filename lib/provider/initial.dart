@@ -1,6 +1,6 @@
 import 'package:avena/model/initial.dart';
 import 'package:avena/provider/auth.dart';
-import 'package:avena/provider/profile_provider.dart';
+import 'package:avena/provider/profile.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'initial.g.dart';
