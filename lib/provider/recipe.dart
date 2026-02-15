@@ -1,5 +1,6 @@
 import 'package:avena/model/recipe.dart';
 import 'package:avena/provider/api.dart';
+import 'package:avena/provider/auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'recipe.g.dart';
@@ -7,6 +8,9 @@ part 'recipe.g.dart';
 @riverpod
 Future<List<Recipe>> recipes(Ref ref) async {
   final api = ref.watch(backendApiProvider);
+
+  final authenticatedUser = await ref.watch(authenticatedUserProvider.future);
+  if (authenticatedUser == null) throw Exception();
 
   return await api.suggestRecipes(true);
 }

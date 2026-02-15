@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:avena/model/ingredient.dart';
 import 'package:avena/provider/api.dart';
+import 'package:avena/provider/auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'inventory.g.dart';
@@ -11,6 +12,9 @@ class InventoryNotifier extends _$InventoryNotifier {
   @override
   Future<List<Ingredient>> build() async {
     final api = ref.watch(backendApiProvider);
+
+    final authenticatedUser = await ref.watch(authenticatedUserProvider.future);
+    if (authenticatedUser == null) throw Exception();
 
     return await api.getInventory();
   }

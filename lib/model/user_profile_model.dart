@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user_profile_model.freezed.dart';
 part 'user_profile_model.g.dart';
 
+@JsonEnum(valueField: "name")
 enum Gender {
   male("Male", 5),
   female("Female", -161),
@@ -13,6 +14,7 @@ enum Gender {
   final double offset;
 }
 
+@JsonEnum(valueField: "name")
 enum HealthGoal {
   loseWeight("Lose Weight", -500),
   buildMuscle("Build Muscle", 300),
@@ -24,10 +26,11 @@ enum HealthGoal {
   final double offset;
 }
 
+@JsonEnum(valueField: "name")
 enum Pace {
   intensive("Intensive", "Fast results, strict plan", 0.7),
   balanced("Balanced", "Moderate pace with flexibility", 1),
-  steady("Steady & Sustainable", "Fast results, strict plan", 1.3);
+  steady("Steady & Sustainable", "Gradual progress, long-term habits", 1.3);
 
   const Pace(this.name, this.description, this.factor);
   final String name;
@@ -35,6 +38,7 @@ enum Pace {
   final double factor;
 }
 
+@JsonEnum(valueField: "name")
 enum ActivityLevel {
   sedentary("Sedentary", 'Little or no exercise', 1.2),
   lightlyActive("Lightly Active", 'Light exercise, 1-3 days/week', 1.375),
@@ -52,6 +56,7 @@ enum ActivityLevel {
   final double factor;
 }
 
+@JsonEnum(valueField: "name")
 enum Meal {
   breakfast("Breakfast"),
   brunch("Brunch"),
@@ -64,6 +69,7 @@ enum Meal {
   final String name;
 }
 
+@JsonEnum(valueField: "name")
 enum Restriction {
   gluten('Gluten-free'),
   dairy('Dairy-free'),
@@ -102,8 +108,8 @@ abstract class UserProfile with _$UserProfile {
     double? goalWeight,
     Pace? pace,
     ActivityLevel? activityLevel,
-    @Default([Meal.breakfast, Meal.lunch, Meal.dinner]) Set<Meal> meals,
-    @Default([]) Set<Restriction> restrictions,
+    @Default([Meal.breakfast, Meal.lunch, Meal.dinner]) List<Meal> meals,
+    @Default([]) List<Restriction> restrictions,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>
@@ -159,7 +165,7 @@ abstract class UserProfile with _$UserProfile {
       gender != null && age != null && weight != null && height != null,
     QAStep.healthGoal =>
       healthGoal != null &&
-          (healthGoal != HealthGoal.loseWeight && goalWeight != null),
+          (healthGoal != HealthGoal.loseWeight || goalWeight != null),
     QAStep.pace => pace != null,
     QAStep.activityLevel => activityLevel != null,
     QAStep.meals => meals.isNotEmpty,

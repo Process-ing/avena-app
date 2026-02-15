@@ -1,8 +1,7 @@
 import 'package:avena/model/user_profile_model.dart';
-import 'package:avena/screen/home.dart';
+import 'package:avena/provider/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../provider/profile_provider.dart';
 import 'package:avena/screen/main_shell.dart';
 
 class QAScreen extends ConsumerStatefulWidget {
@@ -222,16 +221,14 @@ class _AboutYouStepState extends State<_AboutYouStep> {
       text: widget.profile.age?.toString(),
     );
     _ageController.addListener(() {
-      widget.profileNotifier.updateData(
-        age: int.tryParse(_ageController.text) ?? 0,
-      );
+      widget.profileNotifier.updateData(age: int.tryParse(_ageController.text));
     });
     _weightController = TextEditingController(
       text: widget.profile.weight?.toString(),
     );
     _weightController.addListener(() {
       widget.profileNotifier.updateData(
-        weight: double.tryParse(_weightController.text) ?? 0,
+        weight: double.tryParse(_weightController.text),
       );
     });
     _heightController = TextEditingController(
@@ -239,7 +236,7 @@ class _AboutYouStepState extends State<_AboutYouStep> {
     );
     _heightController.addListener(() {
       widget.profileNotifier.updateData(
-        height: double.tryParse(_heightController.text) ?? 0,
+        height: double.tryParse(_heightController.text),
       );
     });
   }
@@ -345,7 +342,7 @@ class _HealthGoalStepState extends State<_HealthGoalStep> {
     );
     _goalWeightController.addListener(() {
       widget.profileNotifier.updateData(
-        goalWeight: double.tryParse(_goalWeightController.text) ?? 0,
+        goalWeight: double.tryParse(_goalWeightController.text),
       );
     });
   }
@@ -709,7 +706,7 @@ class _SummaryStep extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ],

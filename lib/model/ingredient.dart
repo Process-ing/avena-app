@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'ingredient.freezed.dart';
 part 'ingredient.g.dart';
 
+@JsonEnum(valueField: "name")
 enum Unit {
   gram('g'),
   milliliter('ml'),
@@ -20,5 +21,6 @@ abstract class Ingredient with _$Ingredient {
     required Unit unit,
   }) = _Ingredient;
 
-  factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
+  factory Ingredient.fromJson(Map<String, dynamic> json) =>
+      _$IngredientFromJson(json);
 }

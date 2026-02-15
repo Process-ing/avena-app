@@ -1,3 +1,4 @@
+import 'package:avena/provider/auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../model/user_profile_model.dart';
 import 'api.dart';
@@ -9,6 +10,9 @@ class UserProfileNotifier extends _$UserProfileNotifier {
   @override
   Future<UserProfile> build() async {
     final api = ref.watch(backendApiProvider);
+
+    final authenticatedUser = await ref.watch(authenticatedUserProvider.future);
+    if (authenticatedUser == null) throw Exception();
 
     return await api.getUserProfile();
   }
@@ -22,22 +26,22 @@ class UserProfileNotifier extends _$UserProfileNotifier {
     double? goalWeight,
     Pace? pace,
     ActivityLevel? activityLevel,
-    Set<Meal>? meals,
-    Set<Restriction>? restrictions,
+    List<Meal>? meals,
+    List<Restriction>? restrictions,
   }) {
     final api = ref.watch(backendApiProvider);
     final old = state.value ?? UserProfile();
 
     state = AsyncValue.data(
-      old.copyWith(
-        gender: gender,
-        age: age,
-        weight: weight,
-        height: height,
-        healthGoal: healthGoal,
-        goalWeight: goalWeight,
-        pace: pace,
-        activityLevel: activityLevel,
+      UserProfile(
+        gender: gender ?? old.gender,
+        age: age ?? old.age,
+        weight: weight ?? old.weight,
+        height: height ?? old.height,
+        healthGoal: healthGoal ?? old.healthGoal,
+        goalWeight: goalWeight ?? old.goalWeight,
+        pace: pace ?? old.pace,
+        activityLevel: activityLevel ?? old.activityLevel,
         meals: meals ?? old.meals,
         restrictions: restrictions ?? old.restrictions,
       ),
