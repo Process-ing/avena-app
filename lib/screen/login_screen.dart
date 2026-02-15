@@ -1,14 +1,17 @@
+import 'package:avena/mutation/auth.dart';
+import 'package:avena/screen/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:avena/screen/sign_up_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -20,19 +23,38 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _onLogin() {
-    // TODO: Implement login logic
-    // For now, navigate to PantryScreen
-    //Navigator.pushReplacement(
-    //context,
-    //MaterialPageRoute(builder: (context) => const HomeScreen()),
-    //);
+  Future<void> _onLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, preencha todos os campos')),
+      );
+      return;
+    }
+
+    await signIn(ref, email: email, password: password);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(signInMutation, (_, state) {
+      if (state.hasError) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not sign in')));
+      } else if (state.isSuccess) {
+        Navigator.of(
+          context,
+        ).pushReplacement(new MaterialPageRoute(builder: (_) => HomeScreen()));
+      }
+    });
+
+    final signInState = ref.watch(signInMutation);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8F3), // Warm beige background
+      backgroundColor: const Color(0xFFFAF8F3),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -41,9 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset(
-                  'logo.png', // Your plant logo
-                ),
+                Image.asset('assets/logo.png'),
                 const SizedBox(height: 32),
 
                 // App Name
@@ -85,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        enabled: !signInState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'Enter your email',
@@ -115,6 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
+                        enabled: !signInState.isPending,
                         decoration: InputDecoration(
                           labelText: 'Password',
                           hintText: 'Enter your password',
@@ -158,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _onLogin,
+                          onPressed: signInState.isPending ? null : _onLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[700],
                             foregroundColor: Colors.white,
@@ -167,13 +189,22 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          child: signInState.isPending
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -216,44 +247,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  /*
-  Widget _buildSocialButton({
-    String? label,
-    IconData? icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.amber[200]!),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.amber.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Center(
-          child: label != null
-              ? Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.amber[700],
-                  ),
-                )
-              : Icon(icon, size: 28, color: Colors.amber[700]),
-        ),
-      ),
-    );
-  }*/
 }

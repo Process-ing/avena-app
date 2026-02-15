@@ -1,3 +1,4 @@
+import 'package:avena/model/user_profile_model.dart';
 import 'package:avena/model/ingredient.dart';
 import 'package:avena/model/recipe.dart';
 import 'package:dio/dio.dart';
@@ -8,6 +9,12 @@ part 'backend.g.dart';
 @RestApi(baseUrl: 'https://avena.henriquesf.me/api/')
 abstract class BackendApi {
   factory BackendApi(Dio dio, {String baseUrl}) = _BackendApi;
+
+  @GET("user/profile/")
+  Future<UserProfile> getUserProfile();
+
+  @PATCH("user/profile/")
+  Future<UserProfile> updateUserProfile(@Body() UserProfile profile);
 
   @POST("suggest-recipes/")
   Future<List<Recipe>> suggestRecipes(
