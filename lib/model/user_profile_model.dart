@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user_profile_model.freezed.dart';
 part 'user_profile_model.g.dart';
 
-@JsonEnum(valueField: "name")
 enum Gender {
   male("Male", 5),
   female("Female", -161),
@@ -14,11 +13,14 @@ enum Gender {
   final double offset;
 }
 
-@JsonEnum(valueField: "name")
 enum HealthGoal {
+  @JsonValue('lose weight')
   loseWeight("Lose Weight", -500),
+  @JsonValue('build muscle')
   buildMuscle("Build Muscle", 300),
+  @JsonValue('stay fit')
   stayFit("Stay Fit", 0),
+  @JsonValue('eat healthier')
   eatHealthier("Eat Healthier", 0);
 
   const HealthGoal(this.name, this.offset);
@@ -26,7 +28,6 @@ enum HealthGoal {
   final double offset;
 }
 
-@JsonEnum(valueField: "name")
 enum Pace {
   intensive("Intensive", "Fast results, strict plan", 0.7),
   balanced("Balanced", "Moderate pace with flexibility", 1),
@@ -38,16 +39,19 @@ enum Pace {
   final double factor;
 }
 
-@JsonEnum(valueField: "name")
 enum ActivityLevel {
   sedentary("Sedentary", 'Little or no exercise', 1.2),
+  @JsonValue('lightly active')
   lightlyActive("Lightly Active", 'Light exercise, 1-3 days/week', 1.375),
+  @JsonValue('moderately active')
   moderatelyActive(
     "Moderately Active",
     'Moderate exercise, 3-5 days/week',
     1.55,
   ),
+  @JsonValue('very active')
   veryActive("Very Active", 'Hard exercise, 6-7 days/week', 1.725),
+  @JsonValue('extra active')
   extraActive("Extra Active", 'Very hard exercise & physical job', 1.9);
 
   const ActivityLevel(this.name, this.description, this.factor);
@@ -56,29 +60,34 @@ enum ActivityLevel {
   final double factor;
 }
 
-@JsonEnum(valueField: "name")
 enum Meal {
   breakfast("Breakfast"),
+  @JsonValue('morning snack')
+  morningSnack("Morning snack"),
   brunch("Brunch"),
   lunch("Lunch"),
+  @JsonValue('afternoon snack')
   afternoonSnack("Afternoon Snack"),
   dinner("Dinner"),
+  @JsonValue('midnight snack')
   midnightSnack("Midnight Snack");
 
   const Meal(this.name);
   final String name;
 }
 
-@JsonEnum(valueField: "name")
 enum Restriction {
+  @JsonValue('gluten-free')
   gluten('Gluten-free'),
-  dairy('Dairy-free'),
-  nut('Nut-free'),
-  shellfish('Shellfish-free'),
+  // dairy('Dairy-free'),
+  // nut('Nut-free'),
+  // shellfish('Shellfish-free'),
   vegetarian('Vegetarian'),
   vegan('Vegan'),
   pescatarian('Pescatarian'),
+  @JsonValue('no-pork')
   pork('No Pork'),
+  @JsonValue('no-alcohol')
   alcohol('No Alcohol');
 
   const Restriction(this.name);

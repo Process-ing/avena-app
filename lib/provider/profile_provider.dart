@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:avena/provider/auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../model/user_profile_model.dart';
@@ -47,7 +49,7 @@ class UserProfileNotifier extends _$UserProfileNotifier {
       ),
     );
 
-    api.updateUserProfile(state.value!);
+    unawaited(api.updateUserProfile(state.value!));
   }
 
   /// Reset the profile to initial state
