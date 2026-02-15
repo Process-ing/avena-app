@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:avena/screen/recipe.dart';
 
-
 const daysOfWeek = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ];
 
 final Map<String, List<Map<String, dynamic>>> mealsByDay = {
@@ -11,25 +16,29 @@ final Map<String, List<Map<String, dynamic>>> mealsByDay = {
     {
       'label': 'Breakfast',
       'title': 'Raspberry almond butter bowl',
-      'image': 'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=600',
+      'image':
+          'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=600',
       'calories': 320,
     },
     {
       'label': 'Lunch',
       'title': 'Ricotta heirloom tomato tart',
-      'image': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
+      'image':
+          'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600',
       'calories': 450,
     },
     {
       'label': 'Dinner',
       'title': 'Fancy cauli pizza',
-      'image': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600',
+      'image':
+          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600',
       'calories': 380,
     },
     {
       'label': 'Snack',
       'title': 'Fruit & nuts bowl',
-      'image': 'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?w=600',
+      'image':
+          'https://images.unsplash.com/photo-1464306076886-debca5e8a6b0?w=600',
       'calories': 180,
     },
   ],
@@ -117,12 +126,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           indicatorColor: Colors.black,
           indicatorWeight: 3,
           isScrollable: false,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 13),
-          tabs: [
-            for (final d in daysOfWeek)
-              Tab(text: d.substring(0, 3)),
-          ],
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.normal,
+            fontSize: 13,
+          ),
+          tabs: [for (final d in daysOfWeek) Tab(text: d.substring(0, 3))],
         ),
       ),
       body: TabBarView(
@@ -193,20 +205,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     const SizedBox(height: 12),
                     Text(
                       '${caloriesRemaining.toInt()} calories remaining',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               // Meal cards
-              ...meals.map((meal) => _MealCard(
-                meal: meal,
-                onChangeRecipe: widget.onNavigateToCookbook,
-              )),
+              ...meals.map(
+                (meal) => _MealCard(
+                  meal: meal,
+                  onChangeRecipe: widget.onNavigateToCookbook,
+                ),
+              ),
             ],
           );
         }).toList(),
@@ -219,25 +230,22 @@ class _MealCard extends StatelessWidget {
   final Map<String, dynamic> meal;
   final VoidCallback onChangeRecipe;
 
-  const _MealCard({
-    required this.meal,
-    required this.onChangeRecipe,
-  });
+  const _MealCard({required this.meal, required this.onChangeRecipe});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (_) => RecipeDetailScreen(
-               recipeName: meal['title'] ?? '',
-               recipeImage: meal['image'] ?? '',
-               mealType: meal['label'] ?? '',
-               calories: meal['calories'] ?? 0,
-             ),
-           ),
+          context,
+          MaterialPageRoute(
+            builder: (_) => RecipeDetailScreen(
+              recipeName: meal['title'] ?? '',
+              recipeImage: meal['image'] ?? '',
+              mealType: meal['label'] ?? '',
+              calories: meal['calories'] ?? 0,
+            ),
+          ),
         );
       },
       child: Container(
@@ -284,7 +292,7 @@ class _MealCard extends StatelessWidget {
                           child: CircularProgressIndicator(
                             value: loadingProgress.expectedTotalBytes != null
                                 ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
+                                      loadingProgress.expectedTotalBytes!
                                 : null,
                           ),
                         );
