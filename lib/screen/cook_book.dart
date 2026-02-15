@@ -151,13 +151,9 @@ class CookBookScreen extends ConsumerWidget {
         error: (error) {
           print('Error loading recipes: $error');
 
-          return const Center(
-            child: Text('Error loading recipes'),
-          );
+          return const Center(child: Text('Error loading recipes'));
         },
-        loading: (_) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: (_) => const Center(child: CircularProgressIndicator()),
       ),
     );
   }
