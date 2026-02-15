@@ -1,11 +1,8 @@
+import 'package:avena/model/ingredient.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'recipe.freezed.dart';
-
-@freezed
-abstract class Tag with _$Tag {
-  const factory Tag({required int id, required String name}) = _Tag;
-}
+part 'recipe.g.dart';
 
 @freezed
 abstract class Recipe with _$Recipe {
@@ -16,18 +13,21 @@ abstract class Recipe with _$Recipe {
     required String category,
     required String cuisine,
     required String difficulty,
-    required String ingredients,
-    required String instructions,
-    required String meta,
-    required String dietary,
-    required String nutrition,
-    required String storage,
-    required String equipment,
-    required String troubleshooting,
-    required String chefNotes,
-    required String culturalContext,
-    required List<Tag> tags,
+    required int calories,
+    required String totalTime,
+    required String activeTime,
+    required String yields,
+    required int proteinG,
+    required int fatG,
+    required int carbsG,
+    required int fiberG,
+    required bool isVegetarian,
+    required bool isVegan,
+    required bool isGlutenFree,
+    required List<String> tags,
+    required List<Ingredient> ingredients,
+    required int coverageScore,
   }) = _Recipe;
 
-  int? get calories => null;
+  factory Recipe.fromJson(Map<String, dynamic> json) => _$RecipeFromJson(json);
 }

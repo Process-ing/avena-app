@@ -1,10 +1,11 @@
+import 'package:avena/model/ingredient.dart';
+import 'package:avena/model/week.dart';
+import 'package:avena/provider/inventory.dart';
 import 'package:flutter/material.dart';
-import 'package:avena/screen/recipe.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PantryScreen extends StatefulWidget {
-  final void Function() onProfilePressed;
-
-  const PantryScreen({super.key, required this.onProfilePressed});
+  const PantryScreen({super.key, required void Function() onProfilePressed});
 
   @override
   State<PantryScreen> createState() => _PantryScreenState();
@@ -13,190 +14,7 @@ class PantryScreen extends StatefulWidget {
 class _PantryScreenState extends State<PantryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String selectedDay = 'Monday';
-
-  final List<String> daysOfWeek = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
-
-  // Inventory items with structured data
-  final List<Map<String, dynamic>> _inventoryItems = [
-    {'name': 'Flour', 'quantity': 2.0, 'unit': 'kg', 'category': 'Grains'},
-    {'name': 'Sugar', 'quantity': 1.0, 'unit': 'kg', 'category': 'Grains'},
-    {'name': 'Rice', 'quantity': 5.0, 'unit': 'kg', 'category': 'Grains'},
-    {'name': 'Pasta', 'quantity': 500.0, 'unit': 'g', 'category': 'Grains'},
-    {'name': 'Olive Oil', 'quantity': 1.0, 'unit': 'L', 'category': 'Oils'},
-    {'name': 'Salt', 'quantity': 500.0, 'unit': 'g', 'category': 'Spices'},
-    {
-      'name': 'Black Pepper',
-      'quantity': 100.0,
-      'unit': 'g',
-      'category': 'Spices',
-    },
-    {
-      'name': 'Garlic',
-      'quantity': 200.0,
-      'unit': 'g',
-      'category': 'Vegetables',
-    },
-    {'name': 'Onions', 'quantity': 1.0, 'unit': 'kg', 'category': 'Vegetables'},
-    {
-      'name': 'Tomatoes',
-      'quantity': 500.0,
-      'unit': 'g',
-      'category': 'Vegetables',
-    },
-    {'name': 'Eggs', 'quantity': 12.0, 'unit': 'pcs', 'category': 'Dairy'},
-    {'name': 'Milk', 'quantity': 2.0, 'unit': 'L', 'category': 'Dairy'},
-    {'name': 'Butter', 'quantity': 250.0, 'unit': 'g', 'category': 'Dairy'},
-    {'name': 'Cheese', 'quantity': 400.0, 'unit': 'g', 'category': 'Dairy'},
-    {
-      'name': 'Chicken Breast',
-      'quantity': 1.0,
-      'unit': 'kg',
-      'category': 'Meat',
-    },
-    {
-      'name': 'Almond Butter',
-      'quantity': 1.0,
-      'unit': 'pcs',
-      'category': 'Other',
-    },
-  ];
-
-  // Sample recipes for different days
-  final Map<String, List<Map<String, dynamic>>> recipesByDay = {
-    'Monday': [
-      {
-        'title': 'Raspberry almond butter\nbowl',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=400',
-        'calories': 320,
-        'ingredients': [
-          {'text': '1 cup frozen raspberries', 'purchased': false},
-          {'text': '1 frozen banana', 'purchased': false},
-          {'text': '1 tablespoon almond butter', 'purchased': true},
-          {
-            'text': '1 cup silk dairy-free almondmilk yogurt',
-            'purchased': false,
-          },
-        ],
-      },
-      {
-        'title': 'Ricotta heirloom tomato\ntart',
-        'subtitle': '(lunch)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
-        'calories': 450,
-        'ingredients': [
-          {'text': '38g finely ground cornmeal', 'purchased': false},
-          {'text': '75g blanched almond flour', 'purchased': false},
-          {'text': '1 teaspoon kosher salt', 'purchased': true},
-        ],
-      },
-    ],
-    'Tuesday': [
-      {
-        'title': 'Avocado toast with\npoached egg',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400',
-        'calories': 280,
-        'ingredients': [
-          {'text': '2 slices whole grain bread', 'purchased': false},
-          {'text': '1 ripe avocado', 'purchased': false},
-          {'text': '2 eggs', 'purchased': true},
-          {'text': '1 tablespoon white vinegar', 'purchased': false},
-          {'text': 'Salt and pepper to taste', 'purchased': false},
-        ],
-      },
-    ],
-    'Wednesday': [
-      {
-        'title': 'Greek yogurt parfait',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
-        'calories': 250,
-        'ingredients': [
-          {'text': '2 cups Greek yogurt', 'purchased': false},
-          {'text': '1 cup granola', 'purchased': false},
-          {'text': '1 cup mixed berries', 'purchased': true},
-          {'text': '2 tablespoons honey', 'purchased': false},
-        ],
-      },
-    ],
-    'Thursday': [
-      {
-        'title': 'Smoothie bowl',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400',
-        'calories': 300,
-        'ingredients': [
-          {'text': '2 frozen bananas', 'purchased': false},
-          {'text': '1 cup spinach', 'purchased': false},
-          {'text': '0.5 cup almond milk', 'purchased': true},
-          {'text': '1 tablespoon chia seeds', 'purchased': false},
-        ],
-      },
-    ],
-    'Friday': [
-      {
-        'title': 'Pancakes with maple syrup',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=400',
-        'calories': 400,
-        'ingredients': [
-          {'text': '2 cups all-purpose flour', 'purchased': false},
-          {'text': '2 tablespoons sugar', 'purchased': true},
-          {'text': '2 teaspoons baking powder', 'purchased': false},
-          {'text': '2 eggs', 'purchased': false},
-          {'text': '1.5 cups milk', 'purchased': false},
-        ],
-      },
-    ],
-    'Saturday': [
-      {
-        'title': 'Eggs benedict',
-        'subtitle': '(brunch)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1608039829572-78524f79ca0c?w=400',
-        'calories': 500,
-        'ingredients': [
-          {'text': '4 eggs', 'purchased': false},
-          {'text': '2 English muffins', 'purchased': false},
-          {'text': '4 slices Canadian bacon', 'purchased': true},
-          {'text': '3 egg yolks', 'purchased': false},
-          {'text': '0.5 cup butter', 'purchased': false},
-        ],
-      },
-    ],
-    'Sunday': [
-      {
-        'title': 'French toast',
-        'subtitle': '(breakfast)',
-        'imageUrl':
-        'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400',
-        'calories': 350,
-        'ingredients': [
-          {'text': '4 slices bread', 'purchased': false},
-          {'text': '3 eggs', 'purchased': false},
-          {'text': '0.5 cup milk', 'purchased': true},
-          {'text': '1 teaspoon vanilla extract', 'purchased': false},
-          {'text': '1 teaspoon cinnamon', 'purchased': false},
-        ],
-      },
-    ],
-  };
+  WeekDay selectedDay = WeekDay.monday;
 
   @override
   void initState() {
@@ -210,9 +28,9 @@ class _PantryScreenState extends State<PantryScreen>
     super.dispose();
   }
 
-  void _removeRecipe(String day, int index) {
+  void _removeRecipe(WeekDay day, int index) {
     setState(() {
-      recipesByDay[day]?.removeAt(index);
+      // recipesByDay[day]?.removeAt(index);
     });
   }
 
@@ -222,32 +40,32 @@ class _PantryScreenState extends State<PantryScreen>
     final cleanName = _extractIngredientName(ingredientText).toLowerCase();
 
     // Check if any inventory item matches
-    for (var invItem in _inventoryItems) {
-      final invName = (invItem['name'] as String).toLowerCase();
+    // for (var invItem in _inventoryItems) {
+    //   final invName = (invItem['name'] as String).toLowerCase();
 
-      // Use word boundary matching to avoid false matches
-      // "butter" should not match "almond butter"
-      // Split both into words and check for exact word matches
-      final cleanWords = cleanName.split(RegExp(r'\s+'));
-      final invWords = invName.split(RegExp(r'\s+'));
+    //   // Use word boundary matching to avoid false matches
+    //   // "butter" should not match "almond butter"
+    //   // Split both into words and check for exact word matches
+    //   final cleanWords = cleanName.split(RegExp(r'\s+'));
+    //   final invWords = invName.split(RegExp(r'\s+'));
 
-      // Check if all inventory words are present in the ingredient
-      bool allWordsMatch = true;
-      for (var invWord in invWords) {
-        if (!cleanWords.contains(invWord)) {
-          allWordsMatch = false;
-          break;
-        }
-      }
+    //   // Check if all inventory words are present in the ingredient
+    //   bool allWordsMatch = true;
+    //   for (var invWord in invWords) {
+    //     if (!cleanWords.contains(invWord)) {
+    //       allWordsMatch = false;
+    //       break;
+    //     }
+    //   }
 
-      if (allWordsMatch && invWords.isNotEmpty) {
-        final quantity = invItem['quantity'] as double;
-        // Item exists and has stock
-        if (quantity > 0) {
-          return true;
-        }
-      }
-    }
+    //   if (allWordsMatch && invWords.isNotEmpty) {
+    //     final quantity = invItem['quantity'] as double;
+    //     // Item exists and has stock
+    //     if (quantity > 0) {
+    //       return true;
+    //     }
+    //   }
+    // }
 
     return false;
   }
@@ -258,12 +76,12 @@ class _PantryScreenState extends State<PantryScreen>
     String cleaned = ingredientText
         .replaceAll(RegExp(r'^\d+\.?\d*\s*'), '') // Remove numbers at start
         .replaceAll(
-      RegExp(
-        r'^(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|g|kg|ml|l|oz|lb|pcs|piece|pieces|slices?|frozen|fresh|ripe|whole|grain|all-purpose|dairy-free)\s+',
-        caseSensitive: false,
-      ),
-      '',
-    );
+          RegExp(
+            r'^(cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|g|kg|ml|l|oz|lb|pcs|piece|pieces|slices?|frozen|fresh|ripe|whole|grain|all-purpose|dairy-free)\s+',
+            caseSensitive: false,
+          ),
+          '',
+        );
 
     return cleaned.trim();
   }
@@ -278,12 +96,9 @@ class _PantryScreenState extends State<PantryScreen>
         centerTitle: true,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: widget.onProfilePressed,
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[300],
-              child: Icon(Icons.person, color: Colors.grey[600], size: 20),
-            ),
+          child: CircleAvatar(
+            backgroundColor: Colors.grey[300],
+            child: Icon(Icons.person, color: Colors.grey[600], size: 20),
           ),
         ),
         title: const Text(
@@ -308,204 +123,13 @@ class _PantryScreenState extends State<PantryScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildInventoryTab(), _buildShoppingList()],
-      ),
-    );
-  }
-
-  Widget _buildInventoryTab() {
-    return Stack(
-      children: [
-        ListView.builder(
-          padding: const EdgeInsets.all(16).copyWith(bottom: 80),
-          itemCount: _inventoryItems.length,
-          itemBuilder: (context, index) {
-            final item = _inventoryItems[index];
-            return InventoryItemCard(
-              item: item,
-              onIncrement: () => _updateQuantity(index, 1),
-              onDecrement: () => _updateQuantity(index, -1),
-              onDelete: () => _deleteInventoryItem(index),
-            );
-          },
-        ),
-        // Add button
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: FloatingActionButton(
-            onPressed: _showAddInventoryDialog,
-            backgroundColor: Colors.black,
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _updateQuantity(int index, int change) {
-    setState(() {
-      final currentQty = _inventoryItems[index]['quantity'] as double;
-      final newQty = currentQty + change;
-      if (newQty >= 0) {
-        _inventoryItems[index]['quantity'] = newQty;
-      }
-    });
-  }
-
-  void _deleteInventoryItem(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Item'),
-        content: Text(
-          'Remove ${_inventoryItems[index]['name']} from inventory?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _inventoryItems.removeAt(index);
-              });
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddInventoryDialog() {
-    final nameController = TextEditingController();
-    final quantityController = TextEditingController(text: '1');
-    String selectedUnit = 'kg';
-    String selectedCategory = 'Grains';
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Add Inventory Item'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Item Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: TextField(
-                        controller: quantityController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Quantity',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: selectedUnit,
-                        decoration: const InputDecoration(
-                          labelText: 'Unit',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: ['kg', 'g', 'L', 'ml', 'pcs', 'cups']
-                            .map(
-                              (unit) => DropdownMenuItem(
-                            value: unit,
-                            child: Text(unit),
-                          ),
-                        )
-                            .toList(),
-                        onChanged: (value) {
-                          setDialogState(() {
-                            selectedUnit = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                  ),
-                  items:
-                  [
-                    'Grains',
-                    'Dairy',
-                    'Meat',
-                    'Vegetables',
-                    'Fruits',
-                    'Spices',
-                    'Oils',
-                    'Other',
-                  ]
-                      .map(
-                        (category) => DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    ),
-                  )
-                      .toList(),
-                  onChanged: (value) {
-                    setDialogState(() {
-                      selectedCategory = value!;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  setState(() {
-                    _inventoryItems.add({
-                      'name': nameController.text,
-                      'quantity':
-                      double.tryParse(quantityController.text) ?? 1.0,
-                      'unit': selectedUnit,
-                      'category': selectedCategory,
-                    });
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        ),
+        children: [Inventory(), _buildShoppingList()],
       ),
     );
   }
 
   Widget _buildShoppingList() {
-    final currentRecipes = recipesByDay[selectedDay] ?? [];
+    final currentRecipes = /* recipesByDay[selectedDay] ?? */ [];
 
     return Column(
       children: [
@@ -516,7 +140,7 @@ class _PantryScreenState extends State<PantryScreen>
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: daysOfWeek.map((day) {
+              children: WeekDay.values.map((day) {
                 final isSelected = day == selectedDay;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -539,7 +163,7 @@ class _PantryScreenState extends State<PantryScreen>
                         ),
                       ),
                       child: Text(
-                        day,
+                        day.name,
                         style: TextStyle(
                           color: isSelected ? Colors.white : Colors.black87,
                           fontWeight: isSelected
@@ -558,33 +182,32 @@ class _PantryScreenState extends State<PantryScreen>
         Expanded(
           child: currentRecipes.isEmpty
               ? const Center(
-            child: Text(
-              'No recipes for this day',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          )
-              : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: currentRecipes.length,
-            itemBuilder: (context, index) {
-              final recipe = currentRecipes[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: RecipeCard(
-                  key: ValueKey('${selectedDay}_$index'),
-                  title: recipe['title'],
-                  subtitle: recipe['subtitle'],
-                  imageUrl: recipe['imageUrl'],
-                  calories: recipe['calories'],
-                  ingredients: List<Map<String, dynamic>>.from(
-                    recipe['ingredients'],
+                  child: Text(
+                    'No recipes for this day',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-                  onRemove: () => _removeRecipe(selectedDay, index),
-                  checkInventory: _checkIngredientInInventory,
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: currentRecipes.length,
+                  itemBuilder: (context, index) {
+                    final recipe = currentRecipes[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: RecipeCard(
+                        key: ValueKey('${selectedDay}_$index'),
+                        title: recipe['title'],
+                        subtitle: recipe['subtitle'],
+                        imageUrl: recipe['imageUrl'],
+                        ingredients: List<Map<String, dynamic>>.from(
+                          recipe['ingredients'],
+                        ),
+                        onRemove: () => _removeRecipe(selectedDay, index),
+                        checkInventory: _checkIngredientInInventory,
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
@@ -595,7 +218,6 @@ class RecipeCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final String imageUrl;
-  final int? calories;
   final List<Map<String, dynamic>> ingredients;
   final VoidCallback onRemove;
   final bool Function(String) checkInventory;
@@ -605,7 +227,6 @@ class RecipeCard extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.imageUrl,
-    this.calories,
     required this.ingredients,
     required this.onRemove,
     required this.checkInventory,
@@ -676,259 +297,244 @@ class _RecipeCardState extends State<RecipeCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (_) => RecipeDetailScreen(
-               recipeName: widget.title.replaceAll('\n', ' '),
-               recipeImage: widget.imageUrl,
-               mealType: widget.subtitle.replaceAll(RegExp(r'[()]'), ''),
-               calories: widget.calories ?? 0,
-             ),
-           ),
-         );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image with title overlay and error handling
+          Container(
+            height: 160,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+              color: Colors.grey[300],
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image with title overlay and error handling
-            Container(
-              height: 160,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                  child: Image.network(
+                    widget.imageUrl,
+                    width: double.infinity,
+                    height: 160,
+                    fit: BoxFit.cover,
+                    colorBlendMode: BlendMode.darken,
+                    color: Colors.black.withValues(alpha: 0.3),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                color: Colors.grey[300],
-              ),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    child: Image.network(
-                      widget.imageUrl,
-                      width: double.infinity,
-                      height: 160,
-                      fit: BoxFit.cover,
-                      colorBlendMode: BlendMode.darken,
-                      color: Colors.black.withValues(alpha: 0.3),
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              size: 48,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            widget.title,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.subtitle,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Portions control
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Portions',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    children: [
-                      _buildPortionButton(
-                        icon: Icons.remove,
-                        onPressed: () {
-                          if (portions > 1) {
-                            setState(() {
-                              portions--;
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        width: 30,
-                        child: Text(
-                          '$portions',
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.title,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      _buildPortionButton(
-                        icon: Icons.add,
-                        onPressed: () {
-                          setState(() {
-                            portions++;
-                          });
-                        },
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.subtitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            // Ingredients list - automatically crossed if in inventory
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(widget.ingredients.length, (index) {
-                  final originalText =
-                  widget.ingredients[index]['text'] as String;
-                  final scaledText = _scaleIngredient(originalText, portions);
-                  final isPurchased = _isIngredientPurchased(index);
-
-                  return GestureDetector(
-                    onTap: () {
-                      // Toggle manual purchase status
-                      if (index >= 0 && index < manuallyPurchased.length) {
-                        setState(() {
-                          manuallyPurchased[index] = !manuallyPurchased[index];
-                        });
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isPurchased
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            size: 20,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              scaledText,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: isPurchased ? Colors.grey : Colors.black87,
-                                decoration: isPurchased
-                                    ? TextDecoration.lineThrough
-                                    : TextDecoration.none,
-                              ),
-                            ),
-                          ),
-                        ],
+          // Portions control
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Portions',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: [
+                    _buildPortionButton(
+                      icon: Icons.remove,
+                      onPressed: () {
+                        if (portions > 1) {
+                          setState(() {
+                            portions--;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 30,
+                      child: Text(
+                        '$portions',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  );
-                }),
-              ),
+                    const SizedBox(width: 12),
+                    _buildPortionButton(
+                      icon: Icons.add,
+                      onPressed: () {
+                        setState(() {
+                          portions++;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
 
-            // Remove button with functionality
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextButton(
-                  onPressed: () {
-                    // Show confirmation dialog
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Remove Recipe'),
-                        content: Text(
-                          'Are you sure you want to remove "${widget.title.replaceAll('\n', ' ')}"?',
+          // Ingredients list - automatically crossed if in inventory
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(widget.ingredients.length, (index) {
+                final originalText =
+                    widget.ingredients[index]['text'] as String;
+                final scaledText = _scaleIngredient(originalText, portions);
+                final isPurchased = _isIngredientPurchased(index);
+
+                return GestureDetector(
+                  onTap: () {
+                    // Toggle manual purchase status
+                    if (index >= 0 && index < manuallyPurchased.length) {
+                      setState(() {
+                        manuallyPurchased[index] = !manuallyPurchased[index];
+                      });
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isPurchased
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                          size: 20,
+                          color: Colors.grey[600],
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              widget.onRemove();
-                            },
-                            child: const Text(
-                              'Remove',
-                              style: TextStyle(color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            scaledText,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: isPurchased ? Colors.grey : Colors.black87,
+                              decoration: isPurchased
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Remove',
-                    style: TextStyle(color: Colors.grey, fontSize: 15),
+                        ),
+                      ],
+                    ),
                   ),
+                );
+              }),
+            ),
+          ),
+
+          // Remove button with functionality
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextButton(
+                onPressed: () {
+                  // Show confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Remove Recipe'),
+                      content: Text(
+                        'Are you sure you want to remove "${widget.title.replaceAll('\n', ' ')}"?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            widget.onRemove();
+                          },
+                          child: const Text(
+                            'Remove',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Remove',
+                  style: TextStyle(color: Colors.grey, fontSize: 15),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -954,9 +560,169 @@ class _RecipeCardState extends State<RecipeCard> {
   }
 }
 
-// Inventory Item Card Widget
+class Inventory extends ConsumerWidget {
+  const Inventory({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inventoryItems = ref.watch(inventoryProvider);
+    final inventoryNotifier = ref.watch(inventoryProvider.notifier);
+
+    return Scaffold(
+      body: inventoryItems.map(
+        data: (inventoryItems) => ListView.builder(
+          padding: const EdgeInsets.all(16).copyWith(bottom: 80),
+          itemCount: inventoryItems.value.length,
+          itemBuilder: (context, index) {
+            final item = inventoryItems.value[index];
+            return InventoryItemCard(
+              item: item,
+              onIncrement: () =>
+                  inventoryNotifier.incrementItemQuantity(index, 1),
+              onDecrement: () =>
+                  inventoryNotifier.incrementItemQuantity(index, -1),
+              onDelete: () => _deleteInventoryItem(
+                context,
+                item,
+                () => inventoryNotifier.removeItem(index),
+              ),
+            );
+          },
+        ),
+        error: (error) => Text(error.error.toString()),
+        loading: (_) => CircularProgressIndicator(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addInventoryItem(context, inventoryNotifier.addItem),
+        backgroundColor: Colors.black,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  void _deleteInventoryItem(
+    BuildContext context,
+    Ingredient item,
+    VoidCallback onDelete,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Item'),
+        content: Text('Remove ${item.name} from inventory?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onDelete();
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addInventoryItem(
+    BuildContext context,
+    void Function(Ingredient) onAdd,
+  ) {
+    final nameController = TextEditingController();
+    final quantityController = TextEditingController(text: '1');
+    Unit selectedUnit = Unit.gram;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Inventory Item'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 16,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Item Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: quantityController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Quantity',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: DropdownButtonFormField<Unit>(
+                        initialValue: selectedUnit,
+                        decoration: const InputDecoration(
+                          labelText: 'Unit',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: Unit.values
+                            .map(
+                              (unit) => DropdownMenuItem(
+                                value: unit,
+                                child: Text(unit.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedUnit = value!;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty) {
+                  Navigator.pop(context);
+                  onAdd(
+                    Ingredient(
+                      name: nameController.text,
+                      quantity: int.tryParse(quantityController.text) ?? 1,
+                      unit: selectedUnit,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class InventoryItemCard extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final Ingredient item;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onDelete;
@@ -971,11 +737,6 @@ class InventoryItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = item['name'] as String;
-    final quantity = item['quantity'] as double;
-    final unit = item['unit'] as String;
-    final category = item['category'] as String;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -995,23 +756,13 @@ class InventoryItemCard extends StatelessWidget {
           const SizedBox(width: 12),
           // Item info
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  category,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                ),
-              ],
+            child: Text(
+              item.name,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
             ),
           ),
           // Quantity controls
@@ -1029,7 +780,7 @@ class InventoryItemCard extends StatelessWidget {
               Container(
                 constraints: const BoxConstraints(minWidth: 60),
                 child: Text(
-                  '${quantity % 1 == 0 ? quantity.toInt() : quantity} $unit',
+                  '${item.quantity} ${item.unit.name}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 15,
