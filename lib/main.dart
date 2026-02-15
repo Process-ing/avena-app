@@ -1,6 +1,6 @@
 import 'package:avena/model/initial.dart';
 import 'package:avena/provider/initial.dart';
-import 'package:avena/screen/home.dart';
+import 'package:avena/screen/main_shell.dart';
 import 'package:avena/screen/qa_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:avena/screen/login_screen.dart';
@@ -52,9 +52,9 @@ class LoadingScreen extends ConsumerWidget {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => switch (state.value!) {
-              InitialState.authenticate => LoginScreen(),
-              InitialState.qa => QAScreen(),
-              InitialState.home => HomeScreen(),
+              InitialState.authenticate => const LoginScreen(),
+              InitialState.qa => const QAScreen(),
+              InitialState.home => const MainShell(),
             },
           ),
         );

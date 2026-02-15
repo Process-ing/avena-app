@@ -1,5 +1,5 @@
 import 'package:avena/mutation/auth.dart';
-import 'package:avena/screen/home.dart';
+import 'package:avena/screen/main_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:avena/screen/sign_up_screen.dart';
@@ -47,7 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       } else if (state.isSuccess) {
         Navigator.of(
           context,
-        ).pushReplacement(new MaterialPageRoute(builder: (_) => HomeScreen()));
+        ).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()));
       }
     });
 
